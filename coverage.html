@@ -1,0 +1,2126 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>config: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/parvpatel20/rate-limiter/internal/config/config.go (0.0%)</option>
+				
+				<option value="file1">github.com/parvpatel20/rate-limiter/internal/http/admin.go (60.8%)</option>
+				
+				<option value="file2">github.com/parvpatel20/rate-limiter/internal/http/middleware.go (72.5%)</option>
+				
+				<option value="file3">github.com/parvpatel20/rate-limiter/internal/http/ui.go (0.0%)</option>
+				
+				<option value="file4">github.com/parvpatel20/rate-limiter/internal/keybuild/http_builder.go (0.0%)</option>
+				
+				<option value="file5">github.com/parvpatel20/rate-limiter/internal/limiter/circuitbreaker.go (85.7%)</option>
+				
+				<option value="file6">github.com/parvpatel20/rate-limiter/internal/limiter/hybrid.go (75.4%)</option>
+				
+				<option value="file7">github.com/parvpatel20/rate-limiter/internal/limiter/limiter.go (0.0%)</option>
+				
+				<option value="file8">github.com/parvpatel20/rate-limiter/internal/limiter/slidingwindow.go (92.3%)</option>
+				
+				<option value="file9">github.com/parvpatel20/rate-limiter/internal/limiter/tokenbucket.go (55.9%)</option>
+				
+				<option value="file10">github.com/parvpatel20/rate-limiter/internal/logging/logger.go (0.0%)</option>
+				
+				<option value="file11">github.com/parvpatel20/rate-limiter/internal/metrics/metrics.go (78.8%)</option>
+				
+				<option value="file12">github.com/parvpatel20/rate-limiter/internal/policy/matcher.go (86.0%)</option>
+				
+				<option value="file13">github.com/parvpatel20/rate-limiter/internal/policy/yaml_store.go (0.0%)</option>
+				
+				<option value="file14">github.com/parvpatel20/rate-limiter/internal/store/memory_store.go (0.0%)</option>
+				
+				<option value="file15">github.com/parvpatel20/rate-limiter/internal/store/redis_store.go (69.2%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">no coverage</span>
+				<span class="cov1">low coverage</span>
+				<span class="cov2">*</span>
+				<span class="cov3">*</span>
+				<span class="cov4">*</span>
+				<span class="cov5">*</span>
+				<span class="cov6">*</span>
+				<span class="cov7">*</span>
+				<span class="cov8">*</span>
+				<span class="cov9">*</span>
+				<span class="cov10">high coverage</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package config
+
+import (
+        "fmt"
+        "os"
+        "path/filepath"
+        "strings"
+
+        "github.com/joho/godotenv"
+)
+
+const defaultEnvFile = ".env"
+
+type Config struct {
+        RedisURL     string
+        PoliciesFile string
+        Port         string
+        FailureMode  string
+        AdminSecret  string
+        AppEnv       string
+}
+
+func Load() (Config, error) <span class="cov0" title="0">{
+        return LoadFromFile(defaultEnvFile)
+}</span>
+
+func LoadFromFile(envFile string) (Config, error) <span class="cov0" title="0">{
+        if envFile != "" </span><span class="cov0" title="0">{
+                if _, err := os.Stat(envFile); err == nil </span><span class="cov0" title="0">{
+                        if err := godotenv.Load(envFile); err != nil </span><span class="cov0" title="0">{
+                                return Config{}, fmt.Errorf("load %s: %w", filepath.Base(envFile), err)
+                        }</span>
+                }
+        }
+
+        <span class="cov0" title="0">cfg := Config{
+                RedisURL:     os.Getenv("REDIS_URL"),
+                PoliciesFile: os.Getenv("POLICIES_FILE"),
+                Port:         os.Getenv("PORT"),
+                FailureMode:  strings.ToLower(os.Getenv("FAILURE_MODE")),
+                AdminSecret:  os.Getenv("ADMIN_SECRET"),
+                AppEnv:       strings.ToLower(os.Getenv("APP_ENV")),
+        }
+
+        if cfg.RedisURL == "" </span><span class="cov0" title="0">{
+                return Config{}, fmt.Errorf("REDIS_URL is required")
+        }</span>
+        <span class="cov0" title="0">if cfg.PoliciesFile == "" </span><span class="cov0" title="0">{
+                return Config{}, fmt.Errorf("POLICIES_FILE is required")
+        }</span>
+        <span class="cov0" title="0">if cfg.Port == "" </span><span class="cov0" title="0">{
+                return Config{}, fmt.Errorf("PORT is required")
+        }</span>
+        <span class="cov0" title="0">if cfg.FailureMode == "" </span><span class="cov0" title="0">{
+                cfg.FailureMode = "open"
+        }</span>
+        <span class="cov0" title="0">if cfg.FailureMode != "open" &amp;&amp; cfg.FailureMode != "closed" </span><span class="cov0" title="0">{
+                return Config{}, fmt.Errorf("FAILURE_MODE must be open or closed")
+        }</span>
+        <span class="cov0" title="0">if cfg.AppEnv == "" </span><span class="cov0" title="0">{
+                cfg.AppEnv = "development"
+        }</span>
+
+        <span class="cov0" title="0">return cfg, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package httplayer
+
+import (
+        "encoding/json"
+        "math"
+        "net/http"
+        "sort"
+        "strings"
+        "time"
+
+        "github.com/parvpatel20/rate-limiter/internal/keybuild"
+        "github.com/parvpatel20/rate-limiter/internal/limiter"
+        "github.com/parvpatel20/rate-limiter/internal/policy"
+)
+
+type policyLister interface {
+        List() []policy.Policy
+}
+
+type AdminAPI struct {
+        Builder        keybuild.KeyBuilder
+        Policies       policy.PolicyStore
+        TokenLimiter   limiter.Limiter
+        SlidingLimiter limiter.Limiter
+        AdminSecret    string
+}
+
+type CheckRequest struct {
+        TenantID string `json:"tenant_id"`
+        UserID   string `json:"user_id"`
+        Route    string `json:"route"`
+        Method   string `json:"method"`
+        Plan     string `json:"plan"`
+}
+
+type SimulateRequest struct {
+        TenantID        string `json:"tenant_id"`
+        UserID          string `json:"user_id"`
+        Route           string `json:"route"`
+        Method          string `json:"method"`
+        Plan            string `json:"plan"`
+        RequestsPerSec  int    `json:"requests_per_second"`
+        DurationSeconds int    `json:"duration_seconds"`
+}
+
+func (a *AdminAPI) Register(mux *http.ServeMux) <span class="cov2" title="3">{
+        mux.HandleFunc("POST /v1/check", a.Check)
+        mux.HandleFunc("GET /v1/policies/", a.PoliciesForTenant)
+        mux.HandleFunc("POST /v1/simulate", a.Simulate)
+        mux.HandleFunc("POST /v1/admin/reload", a.Reload)
+}</span>
+
+func (a *AdminAPI) Check(w http.ResponseWriter, r *http.Request) <span class="cov9" title="1000">{
+        var req CheckRequest
+        if err := json.NewDecoder(r.Body).Decode(&amp;req); err != nil </span><span class="cov0" title="0">{
+                http.Error(w, "invalid json", http.StatusBadRequest)
+                return
+        }</span>
+        <span class="cov9" title="1000">desc := requestDescriptor(req)
+        pol, ok := a.Policies.Resolve(desc.Key())
+        if !ok </span><span class="cov0" title="0">{
+                http.Error(w, "no policy matched", http.StatusNotFound)
+                return
+        }</span>
+        <span class="cov9" title="1000">lim := a.pickLimiter(pol.Algorithm)
+        if lim == nil </span><span class="cov0" title="0">{
+                http.Error(w, "limiter unavailable", http.StatusInternalServerError)
+                return
+        }</span>
+
+        <span class="cov9" title="1000">inspectKey := "inspect:" + desc.Key()
+        res, err := lim.Allow(r.Context(), inspectKey, pol.Limit, time.Duration(pol.WindowSeconds)*time.Second)
+        if err != nil </span><span class="cov0" title="0">{
+                http.Error(w, "limiter error", http.StatusServiceUnavailable)
+                return
+        }</span>
+
+        <span class="cov9" title="1000">w.Header().Set("Content-Type", "application/json")
+        _ = json.NewEncoder(w).Encode(map[string]any{
+                "policy": pol,
+                "result": res,
+        })</span>
+}
+
+func (a *AdminAPI) PoliciesForTenant(w http.ResponseWriter, r *http.Request) <span class="cov1" title="1">{
+        tenantID := strings.TrimPrefix(r.URL.Path, "/v1/policies/")
+        if tenantID == "" </span><span class="cov0" title="0">{
+                http.Error(w, "tenant id is required", http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov1" title="1">lister, ok := a.Policies.(policyLister)
+        if !ok </span><span class="cov0" title="0">{
+                http.Error(w, "policy listing unavailable", http.StatusNotImplemented)
+                return
+        }</span>
+        <span class="cov1" title="1">all := lister.List()
+        out := make([]policy.Policy, 0)
+        needle := "tenant:" + tenantID
+        for _, p := range all </span><span class="cov2" title="3">{
+                if strings.Contains(p.Descriptor, needle) || strings.HasPrefix(p.Descriptor, "plan:") || p.Descriptor == "global:default" </span><span class="cov2" title="3">{
+                        out = append(out, p)
+                }</span>
+        }
+        <span class="cov1" title="1">sort.Slice(out, func(i, j int) bool </span><span class="cov1" title="2">{ return out[i].Name &lt; out[j].Name }</span>)
+
+        <span class="cov1" title="1">w.Header().Set("Content-Type", "application/json")
+        _ = json.NewEncoder(w).Encode(map[string]any{
+                "tenant_id": tenantID,
+                "policies":  out,
+        })</span>
+}
+
+func (a *AdminAPI) Simulate(w http.ResponseWriter, r *http.Request) <span class="cov1" title="2">{
+        var req SimulateRequest
+        if err := json.NewDecoder(r.Body).Decode(&amp;req); err != nil </span><span class="cov0" title="0">{
+                http.Error(w, "invalid json", http.StatusBadRequest)
+                return
+        }</span>
+        <span class="cov1" title="2">if req.RequestsPerSec &lt;= 0 || req.DurationSeconds &lt;= 0 </span><span class="cov1" title="1">{
+                http.Error(w, "requests_per_second and duration_seconds must be positive", http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov1" title="1">desc := requestDescriptor(CheckRequest{
+                TenantID: req.TenantID,
+                UserID:   req.UserID,
+                Route:    req.Route,
+                Method:   req.Method,
+                Plan:     req.Plan,
+        })
+        pol, ok := a.Policies.Resolve(desc.Key())
+        if !ok </span><span class="cov0" title="0">{
+                http.Error(w, "no policy matched", http.StatusNotFound)
+                return
+        }</span>
+
+        <span class="cov1" title="1">total := req.RequestsPerSec * req.DurationSeconds
+        allowed, denied := simulate(pol.Algorithm, pol.Limit, time.Duration(pol.WindowSeconds)*time.Second, req.RequestsPerSec, total)
+
+        w.Header().Set("Content-Type", "application/json")
+        _ = json.NewEncoder(w).Encode(map[string]any{
+                "policy":  pol,
+                "total":   total,
+                "allowed": allowed,
+                "denied":  denied,
+        })</span>
+}
+
+func (a *AdminAPI) Reload(w http.ResponseWriter, r *http.Request) <span class="cov2" title="3">{
+        if a.AdminSecret == "" || r.Header.Get("X-Admin-Secret") != a.AdminSecret </span><span class="cov1" title="2">{
+                http.Error(w, "unauthorized", http.StatusUnauthorized)
+                return
+        }</span>
+        <span class="cov1" title="1">if err := a.Policies.Reload(); err != nil </span><span class="cov0" title="0">{
+                http.Error(w, err.Error(), http.StatusBadRequest)
+                return
+        }</span>
+        <span class="cov1" title="1">w.Header().Set("Content-Type", "application/json")
+        _ = json.NewEncoder(w).Encode(map[string]any{"status": "ok"})</span>
+}
+
+func (a *AdminAPI) pickLimiter(algorithm string) limiter.Limiter <span class="cov9" title="1000">{
+        if algorithm == "sliding_window" </span><span class="cov0" title="0">{
+                if a.SlidingLimiter != nil </span><span class="cov0" title="0">{
+                        return a.SlidingLimiter
+                }</span>
+                <span class="cov0" title="0">return a.TokenLimiter</span>
+        }
+        <span class="cov9" title="1000">return a.TokenLimiter</span>
+}
+
+func requestDescriptor(req CheckRequest) limiter.Descriptor <span class="cov10" title="1001">{
+        method := req.Method
+        if method == "" </span><span class="cov0" title="0">{
+                method = http.MethodGet
+        }</span>
+        <span class="cov10" title="1001">route := req.Route
+        if route == "" </span><span class="cov0" title="0">{
+                route = "/"
+        }</span>
+        <span class="cov10" title="1001">plan := req.Plan
+        if plan == "" </span><span class="cov0" title="0">{
+                plan = "free"
+        }</span>
+        <span class="cov10" title="1001">return limiter.Descriptor{
+                TenantID: req.TenantID,
+                UserID:   req.UserID,
+                Route:    route,
+                Method:   method,
+                Plan:     plan,
+        }</span>
+}
+
+func simulate(algorithm string, limit int64, window time.Duration, rps int, total int) (int, int) <span class="cov1" title="1">{
+        if algorithm == "sliding_window" </span><span class="cov0" title="0">{
+                return simulateSlidingWindow(limit, window, rps, total)
+        }</span>
+        <span class="cov1" title="1">return simulateTokenBucket(limit, window, rps, total)</span>
+}
+
+func simulateTokenBucket(limit int64, window time.Duration, rps int, total int) (int, int) <span class="cov1" title="1">{
+        if limit &lt;= 0 || window &lt;= 0 || rps &lt;= 0 || total &lt;= 0 </span><span class="cov0" title="0">{
+                return 0, max(total, 0)
+        }</span>
+        <span class="cov1" title="1">tokens := float64(limit)
+        rate := float64(limit) / window.Seconds()
+        step := 1.0 / float64(rps)
+        lastT := 0.0
+        allowed := 0
+        for i := 0; i &lt; total; i++ </span><span class="cov4" title="20">{
+                nowT := float64(i) * step
+                tokens = math.Min(float64(limit), tokens+(nowT-lastT)*rate)
+                lastT = nowT
+                if tokens &gt;= 1 </span><span class="cov4" title="20">{
+                        tokens -= 1
+                        allowed++
+                }</span>
+        }
+        <span class="cov1" title="1">return allowed, total - allowed</span>
+}
+
+func simulateSlidingWindow(limit int64, window time.Duration, rps int, total int) (int, int) <span class="cov0" title="0">{
+        if limit &lt;= 0 || window &lt;= 0 || rps &lt;= 0 || total &lt;= 0 </span><span class="cov0" title="0">{
+                return 0, max(total, 0)
+        }</span>
+        <span class="cov0" title="0">step := 1.0 / float64(rps)
+        windowS := window.Seconds()
+        times := make([]float64, 0, limit)
+        allowed := 0
+        for i := 0; i &lt; total; i++ </span><span class="cov0" title="0">{
+                nowT := float64(i) * step
+                cut := nowT - windowS
+                idx := 0
+                for idx &lt; len(times) &amp;&amp; times[idx] &lt;= cut </span><span class="cov0" title="0">{
+                        idx++
+                }</span>
+                <span class="cov0" title="0">if idx &gt; 0 </span><span class="cov0" title="0">{
+                        times = append([]float64(nil), times[idx:]...)
+                }</span>
+                <span class="cov0" title="0">if int64(len(times)) &lt; limit </span><span class="cov0" title="0">{
+                        times = append(times, nowT)
+                        allowed++
+                }</span>
+        }
+        <span class="cov0" title="0">return allowed, total - allowed</span>
+}
+
+func max(a, b int) int <span class="cov0" title="0">{
+        if a &gt; b </span><span class="cov0" title="0">{
+                return a
+        }</span>
+        <span class="cov0" title="0">return b</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package httplayer
+
+import (
+        "context"
+        "crypto/rand"
+        "encoding/hex"
+        "encoding/json"
+        "log/slog"
+        "math"
+        "net/http"
+        "os"
+        "strconv"
+        "time"
+
+        "github.com/parvpatel20/rate-limiter/internal/keybuild"
+        "github.com/parvpatel20/rate-limiter/internal/limiter"
+        "github.com/parvpatel20/rate-limiter/internal/logging"
+        "github.com/parvpatel20/rate-limiter/internal/metrics"
+        "github.com/parvpatel20/rate-limiter/internal/policy"
+)
+
+type Middleware struct {
+        Builder        keybuild.KeyBuilder
+        Policies       policy.PolicyStore
+        TokenLimiter   limiter.Limiter
+        SlidingLimiter limiter.Limiter
+        FailureMode    string
+        Timeout        time.Duration
+        Logger         *slog.Logger
+        Metrics        *metrics.Metrics
+}
+
+func NewMiddleware(builder keybuild.KeyBuilder, policies policy.PolicyStore, tokenLimiter limiter.Limiter, slidingLimiter limiter.Limiter, logger *slog.Logger) *Middleware <span class="cov10" title="4">{
+        mode := os.Getenv("FAILURE_MODE")
+        if mode == "" </span><span class="cov10" title="4">{
+                mode = "open"
+        }</span>
+        <span class="cov10" title="4">if logger == nil </span><span class="cov10" title="4">{
+                logger = slog.Default()
+        }</span>
+        <span class="cov10" title="4">return &amp;Middleware{
+                Builder:        builder,
+                Policies:       policies,
+                TokenLimiter:   tokenLimiter,
+                SlidingLimiter: slidingLimiter,
+                FailureMode:    mode,
+                Timeout:        100 * time.Millisecond,
+                Logger:         logger,
+                Metrics:        nil,
+        }</span>
+}
+
+func (m *Middleware) Handler(next http.Handler) http.Handler <span class="cov10" title="4">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov10" title="4">{
+                start := time.Now()
+                desc, err := m.Builder.Build(r)
+                if err != nil </span><span class="cov0" title="0">{
+                        http.Error(w, "invalid request descriptor", http.StatusBadRequest)
+                        return
+                }</span>
+                <span class="cov10" title="4">traceID := r.Header.Get("X-Trace-ID")
+                if traceID == "" </span><span class="cov10" title="4">{
+                        traceID = newTraceID()
+                }</span>
+                <span class="cov10" title="4">r = r.WithContext(logging.WithRequestValues(r.Context(), desc.TenantID, traceID, desc.Route))
+
+                p, ok := m.Policies.Resolve(desc.Key())
+                if !ok </span><span class="cov0" title="0">{
+                        if m.Metrics != nil </span><span class="cov0" title="0">{
+                                m.Metrics.PolicyCacheHitsTotal.WithLabelValues("miss").Inc()
+                                m.Metrics.RequestsTotal.WithLabelValues(desc.TenantID, desc.Route, "denied").Inc()
+                        }</span>
+                        <span class="cov0" title="0">http.Error(w, "no policy matched", http.StatusTooManyRequests)
+                        return</span>
+                }
+                <span class="cov10" title="4">if m.Metrics != nil </span><span class="cov0" title="0">{
+                        outcome := "hit"
+                        if p.Descriptor == "global:default" </span><span class="cov0" title="0">{
+                                outcome = "fallback_default"
+                        }</span>
+                        <span class="cov0" title="0">m.Metrics.PolicyCacheHitsTotal.WithLabelValues(outcome).Inc()</span>
+                }
+
+                <span class="cov10" title="4">activeLimiter := m.selectLimiter(p.Algorithm)
+                if activeLimiter == nil </span><span class="cov0" title="0">{
+                        http.Error(w, "limiter unavailable", http.StatusInternalServerError)
+                        return
+                }</span>
+
+                <span class="cov10" title="4">ctx, cancel := context.WithTimeout(r.Context(), m.Timeout)
+                defer cancel()
+
+                res, err := activeLimiter.Allow(ctx, desc.Key(), p.Limit, time.Duration(p.WindowSeconds)*time.Second)
+                if err != nil </span><span class="cov5" title="2">{
+                        latencyMS := time.Since(start).Milliseconds()
+                        attrs := append(logging.RequestAttrs(r.Context()), "result", "error", "latency_ms", latencyMS)
+                        if m.FailureMode == "closed" </span><span class="cov1" title="1">{
+                                m.Logger.Warn("rate_limit_error_closed", append(attrs, "event", "rate_limit_error", "error", err)...)
+                                if m.Metrics != nil </span><span class="cov0" title="0">{
+                                        m.Metrics.RequestsTotal.WithLabelValues(desc.TenantID, desc.Route, "error").Inc()
+                                }</span>
+                                <span class="cov1" title="1">http.Error(w, "rate limiter unavailable", http.StatusServiceUnavailable)
+                                return</span>
+                        }
+                        <span class="cov1" title="1">m.Logger.Warn("rate_limit_error_open", append(attrs, "event", "rate_limit_error", "error", err)...)
+                        if m.Metrics != nil </span><span class="cov0" title="0">{
+                                m.Metrics.RequestsTotal.WithLabelValues(desc.TenantID, desc.Route, "error").Inc()
+                        }</span>
+                        <span class="cov1" title="1">w.Header().Set("X-RateLimit-Warning", "degraded")
+                        next.ServeHTTP(w, r)
+                        return</span>
+                }
+
+                <span class="cov5" title="2">setRateLimitHeaders(w, res)
+                if !res.Allowed </span><span class="cov1" title="1">{
+                        latencyMS := time.Since(start).Milliseconds()
+                        m.Logger.Warn("rate_limit_denied", append(logging.RequestAttrs(r.Context()), "event", "rate_limit_denied", "result", "denied", "remaining", res.Remaining, "retry_after", res.RetryAfter.String(), "latency_ms", latencyMS)...)
+                        if m.Metrics != nil </span><span class="cov0" title="0">{
+                                m.Metrics.RequestsTotal.WithLabelValues(desc.TenantID, desc.Route, "denied").Inc()
+                        }</span>
+                        <span class="cov1" title="1">w.Header().Set("Content-Type", "application/json")
+                        w.WriteHeader(http.StatusTooManyRequests)
+                        retrySeconds := int64(math.Ceil(res.RetryAfter.Seconds()))
+                        if retrySeconds &lt; 0 </span><span class="cov0" title="0">{
+                                retrySeconds = 0
+                        }</span>
+                        <span class="cov1" title="1">_ = json.NewEncoder(w).Encode(map[string]any{
+                                "error":       "rate limit exceeded",
+                                "retry_after": retrySeconds,
+                        })
+                        return</span>
+                }
+
+                <span class="cov1" title="1">next.ServeHTTP(w, r)</span>
+        })
+}
+
+func newTraceID() string <span class="cov10" title="4">{
+        b := make([]byte, 8)
+        if _, err := rand.Read(b); err != nil </span><span class="cov0" title="0">{
+                return strconv.FormatInt(time.Now().UnixNano(), 10)
+        }</span>
+        <span class="cov10" title="4">return hex.EncodeToString(b)</span>
+}
+
+func (m *Middleware) selectLimiter(algorithm string) limiter.Limiter <span class="cov10" title="4">{
+        if algorithm == "sliding_window" </span><span class="cov0" title="0">{
+                if m.SlidingLimiter != nil </span><span class="cov0" title="0">{
+                        return m.SlidingLimiter
+                }</span>
+                <span class="cov0" title="0">return m.TokenLimiter</span>
+        }
+        <span class="cov10" title="4">return m.TokenLimiter</span>
+}
+
+func setRateLimitHeaders(w http.ResponseWriter, res limiter.Result) <span class="cov5" title="2">{
+        w.Header().Set("X-RateLimit-Limit", strconv.FormatInt(res.Limit, 10))
+        w.Header().Set("X-RateLimit-Remaining", strconv.FormatInt(res.Remaining, 10))
+        retrySeconds := int64(math.Ceil(res.RetryAfter.Seconds()))
+        if retrySeconds &lt; 0 </span><span class="cov0" title="0">{
+                retrySeconds = 0
+        }</span>
+        <span class="cov5" title="2">w.Header().Set("Retry-After", strconv.FormatInt(retrySeconds, 10))
+        w.Header().Set("X-RateLimit-Reset", strconv.FormatInt(res.ResetAt.Unix(), 10))</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package httplayer
+
+import "net/http"
+
+func UIHandler() http.HandlerFunc <span class="cov0" title="0">{
+        return func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                w.Header().Set("Content-Type", "text/html; charset=utf-8")
+                _, _ = w.Write([]byte(uiHTML))
+        }</span>
+}
+
+const uiHTML = `&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8" /&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
+  &lt;title&gt;Rate Limiter Dashboard&lt;/title&gt;
+  &lt;style&gt;
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 20px; color: #111; background: #f6f7f9; }
+    h1 { margin: 0 0 14px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
+    .card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 12px; }
+    label { display:block; font-size: 13px; margin: 8px 0 4px; color: #333; }
+    input, select, button, textarea { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #bbb; box-sizing: border-box; }
+    button { cursor: pointer; background: #111; color: #fff; border: 0; margin-top: 10px; }
+    pre { white-space: pre-wrap; word-break: break-word; background: #0b1020; color: #dbe4ff; padding: 10px; border-radius: 6px; min-height: 90px; }
+    .kvs { font-family: ui-monospace, Menlo, monospace; font-size: 13px; line-height: 1.5; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .small { color: #555; font-size: 12px; }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Rate Limiter Dashboard&lt;/h1&gt;
+  &lt;div class="small"&gt;Lightweight built-in UI. No external frontend dependency.&lt;/div&gt;
+
+  &lt;div class="grid" style="margin-top:14px;"&gt;
+    &lt;div class="card"&gt;
+      &lt;h3&gt;Live Metrics&lt;/h3&gt;
+      &lt;div class="kvs" id="metricsBox"&gt;Loading metrics...&lt;/div&gt;
+      &lt;button id="refreshMetrics"&gt;Refresh Metrics&lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;div class="card"&gt;
+      &lt;h3&gt;Quick Request Check&lt;/h3&gt;
+      &lt;label&gt;Tenant ID&lt;/label&gt;&lt;input id="tenant" value="acme" /&gt;
+      &lt;label&gt;User ID&lt;/label&gt;&lt;input id="user" value="42" /&gt;
+      &lt;label&gt;Route&lt;/label&gt;&lt;input id="route" value="/v1/search" /&gt;
+      &lt;label&gt;Method&lt;/label&gt;&lt;input id="method" value="GET" /&gt;
+      &lt;label&gt;Plan&lt;/label&gt;&lt;input id="plan" value="enterprise" /&gt;
+      &lt;button id="runCheck"&gt;POST /v1/check&lt;/button&gt;
+      &lt;pre id="checkOut"&gt;&lt;/pre&gt;
+    &lt;/div&gt;
+
+    &lt;div class="card"&gt;
+      &lt;h3&gt;Policy Lookup&lt;/h3&gt;
+      &lt;label&gt;Tenant ID&lt;/label&gt;&lt;input id="policyTenant" value="acme" /&gt;
+      &lt;button id="loadPolicies"&gt;GET /v1/policies/:tenant&lt;/button&gt;
+      &lt;pre id="policiesOut"&gt;&lt;/pre&gt;
+    &lt;/div&gt;
+
+    &lt;div class="card"&gt;
+      &lt;h3&gt;Simulation&lt;/h3&gt;
+      &lt;div class="row"&gt;
+        &lt;div&gt;&lt;label&gt;Requests / second&lt;/label&gt;&lt;input id="simRps" type="number" value="20" /&gt;&lt;/div&gt;
+        &lt;div&gt;&lt;label&gt;Duration (sec)&lt;/label&gt;&lt;input id="simDuration" type="number" value="10" /&gt;&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;button id="simulate"&gt;POST /v1/simulate&lt;/button&gt;
+      &lt;pre id="simulateOut"&gt;&lt;/pre&gt;
+    &lt;/div&gt;
+
+    &lt;div class="card"&gt;
+      &lt;h3&gt;Admin Reload&lt;/h3&gt;
+      &lt;label&gt;Admin Secret&lt;/label&gt;&lt;input id="adminSecret" type="password" placeholder="from .env ADMIN_SECRET" /&gt;
+      &lt;button id="reloadPolicies"&gt;POST /v1/admin/reload&lt;/button&gt;
+      &lt;pre id="reloadOut"&gt;&lt;/pre&gt;
+    &lt;/div&gt;
+
+    &lt;div class="card"&gt;
+      &lt;h3&gt;Health Probe&lt;/h3&gt;
+      &lt;button id="health"&gt;GET / (with tenant header)&lt;/button&gt;
+      &lt;pre id="healthOut"&gt;&lt;/pre&gt;
+    &lt;/div&gt;
+
+    &lt;div class="card"&gt;
+      &lt;h3&gt;Traffic Burst Test&lt;/h3&gt;
+      &lt;div class="row"&gt;
+        &lt;div&gt;&lt;label&gt;Requests&lt;/label&gt;&lt;input id="burstCount" type="number" value="25" /&gt;&lt;/div&gt;
+        &lt;div&gt;&lt;label&gt;Route&lt;/label&gt;&lt;input id="burstRoute" value="/v1/login" /&gt;&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;label&gt;Method&lt;/label&gt;
+      &lt;select id="burstMethod"&gt;
+        &lt;option value="POST" selected&gt;POST&lt;/option&gt;
+        &lt;option value="GET"&gt;GET&lt;/option&gt;
+      &lt;/select&gt;
+      &lt;button id="runBurst"&gt;Run Burst&lt;/button&gt;
+      &lt;pre id="burstOut"&gt;&lt;/pre&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+&lt;script&gt;
+async function api(url, opts) {
+  const r = await fetch(url, opts || {});
+  const text = await r.text();
+  return { status: r.status, text: text };
+}
+
+function requestPayload() {
+  return {
+    tenant_id: document.getElementById('tenant').value,
+    user_id: document.getElementById('user').value,
+    route: document.getElementById('route').value,
+    method: document.getElementById('method').value,
+    plan: document.getElementById('plan').value
+  };
+}
+
+function parseMetric(text, name, labels) {
+  const lines = text.split('\n').filter(function(l){ return l.startsWith(name); });
+  if (!labels) {
+    const plain = lines.find(function(l){ return l === name || l.startsWith(name + ' '); });
+    if (plain) return plain.split(' ').pop();
+  }
+  if (labels) {
+    const key = Object.keys(labels).map(function(k){ return k + '=\"' + labels[k] + '\"'; }).join(',');
+    const pref = name + '{' + key + '}';
+    const exact = lines.find(function(l){ return l.startsWith(pref); });
+    if (exact) return exact.split(' ').pop();
+  }
+  return '0';
+}
+
+async function loadMetrics() {
+  const r = await api('/metrics');
+  if (r.status !== 200) {
+    document.getElementById('metricsBox').textContent = 'metrics unavailable: HTTP ' + r.status;
+    return;
+  }
+  const txt = r.text;
+  const data = {
+    active_keys: parseMetric(txt, 'ratelimit_active_keys'),
+    circuit_state: parseMetric(txt, 'ratelimit_circuit_breaker_state'),
+    redis_needed: parseMetric(txt, 'ratelimit_local_decisions_total', {decision:'redis_needed'}),
+    fast_allow: parseMetric(txt, 'ratelimit_local_decisions_total', {decision:'fast_allow'}),
+    fast_deny: parseMetric(txt, 'ratelimit_local_decisions_total', {decision:'fast_deny'}),
+    denied_acme_login: parseMetric(txt, 'ratelimit_requests_total', {result:'denied', route:'/v1/login', tenant:'acme'})
+  };
+  document.getElementById('metricsBox').textContent =
+    'active_keys: ' + data.active_keys + '\n' +
+    'circuit_breaker_state: ' + data.circuit_state + ' (0=closed,1=open,2=half-open)\n' +
+    'local_decision.redis_needed: ' + data.redis_needed + '\n' +
+    'local_decision.fast_allow: ' + data.fast_allow + '\n' +
+    'local_decision.fast_deny: ' + data.fast_deny + '\n' +
+    'denied(acme,/v1/login): ' + data.denied_acme_login;
+}
+
+document.getElementById('refreshMetrics').onclick = loadMetrics;
+
+document.getElementById('runCheck').onclick = async function() {
+  const payload = requestPayload();
+  const r = await api('/v1/check', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+  document.getElementById('checkOut').textContent = 'HTTP ' + r.status + '\n' + r.text;
+};
+
+document.getElementById('loadPolicies').onclick = async function() {
+  const tenant = document.getElementById('policyTenant').value || 'acme';
+  const r = await api('/v1/policies/' + encodeURIComponent(tenant));
+  document.getElementById('policiesOut').textContent = 'HTTP ' + r.status + '\n' + r.text;
+};
+
+document.getElementById('simulate').onclick = async function() {
+  const payload = requestPayload();
+  payload.requests_per_second = Number(document.getElementById('simRps').value || '10');
+  payload.duration_seconds = Number(document.getElementById('simDuration').value || '10');
+  const r = await api('/v1/simulate', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+  document.getElementById('simulateOut').textContent = 'HTTP ' + r.status + '\n' + r.text;
+};
+
+document.getElementById('reloadPolicies').onclick = async function() {
+  const secret = document.getElementById('adminSecret').value;
+  const r = await api('/v1/admin/reload', {
+    method: 'POST',
+    headers: {'X-Admin-Secret': secret}
+  });
+  document.getElementById('reloadOut').textContent = 'HTTP ' + r.status + '\n' + r.text;
+};
+
+document.getElementById('health').onclick = async function() {
+  const tenant = document.getElementById('tenant').value || 'acme';
+  const r = await api('/', { headers: {'X-Tenant-ID': tenant} });
+  document.getElementById('healthOut').textContent = 'HTTP ' + r.status + '\n' + r.text;
+};
+
+document.getElementById('runBurst').onclick = async function() {
+  const tenant = document.getElementById('tenant').value || 'acme';
+  const count = Number(document.getElementById('burstCount').value || '10');
+  const route = document.getElementById('burstRoute').value || '/v1/login';
+  const method = document.getElementById('burstMethod').value || 'POST';
+  let ok = 0;
+  let denied = 0;
+  let other = 0;
+
+  for (let i = 0; i &lt; count; i++) {
+    const r = await fetch(route, { method: method, headers: { 'X-Tenant-ID': tenant } });
+    if (r.status === 200) {
+      ok++;
+    } else if (r.status === 429) {
+      denied++;
+    } else {
+      other++;
+    }
+  }
+
+  document.getElementById('burstOut').textContent =
+    'total: ' + count + '\n' +
+    '200 allowed: ' + ok + '\n' +
+    '429 denied: ' + denied + '\n' +
+    'other: ' + other;
+  loadMetrics();
+};
+
+loadMetrics();
+setInterval(loadMetrics, 5000);
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+`
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package keybuild
+
+import (
+        "errors"
+        "net/http"
+
+        "github.com/parvpatel20/rate-limiter/internal/limiter"
+)
+
+var ErrMissingTenantID = errors.New("missing tenant id")
+
+type HTTPBuilder struct {
+        tenantPlans map[string]string
+        defaultPlan string
+}
+
+func NewHTTPBuilder(tenantPlans map[string]string) *HTTPBuilder <span class="cov0" title="0">{
+        plans := make(map[string]string, len(tenantPlans))
+        for tenant, plan := range tenantPlans </span><span class="cov0" title="0">{
+                plans[tenant] = plan
+        }</span>
+        <span class="cov0" title="0">if len(plans) == 0 </span><span class="cov0" title="0">{
+                plans["acme"] = "enterprise"
+                plans["globex"] = "free"
+        }</span>
+        <span class="cov0" title="0">return &amp;HTTPBuilder{tenantPlans: plans, defaultPlan: "free"}</span>
+}
+
+func (b *HTTPBuilder) Build(r *http.Request) (limiter.Descriptor, error) <span class="cov0" title="0">{
+        tenantID := r.Header.Get("X-Tenant-ID")
+        if tenantID == "" </span><span class="cov0" title="0">{
+                return limiter.Descriptor{}, ErrMissingTenantID
+        }</span>
+
+        // TODO: Extract tenant/user from JWT claims when auth middleware is available.
+        <span class="cov0" title="0">userID := r.Header.Get("X-User-ID")
+        route := r.URL.Path
+        if route == "" </span><span class="cov0" title="0">{
+                route = "/"
+        }</span>
+
+        <span class="cov0" title="0">plan := b.defaultPlan
+        if p, ok := b.tenantPlans[tenantID]; ok </span><span class="cov0" title="0">{
+                plan = p
+        }</span>
+
+        <span class="cov0" title="0">return limiter.Descriptor{
+                TenantID: tenantID,
+                UserID:   userID,
+                Route:    route,
+                Method:   r.Method,
+                Plan:     plan,
+        }, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package limiter
+
+import (
+        "sync"
+        "time"
+)
+
+type CircuitState int
+
+const (
+        CircuitClosed CircuitState = iota
+        CircuitOpen
+        CircuitHalfOpen
+)
+
+type CircuitBreakerConfig struct {
+        OpenAfterFailures int
+        OpenTimeout       time.Duration
+        OnStateChange     func(state CircuitState, consecutiveFailures int)
+}
+
+type CircuitBreaker struct {
+        mu sync.Mutex
+
+        cfg CircuitBreakerConfig
+
+        state               CircuitState
+        consecutiveFailures int
+        openedAt            time.Time
+        halfOpenProbeActive bool
+}
+
+func NewCircuitBreaker(cfg CircuitBreakerConfig) *CircuitBreaker <span class="cov4" title="5">{
+        if cfg.OpenAfterFailures &lt;= 0 </span><span class="cov3" title="3">{
+                cfg.OpenAfterFailures = 5
+        }</span>
+        <span class="cov4" title="5">if cfg.OpenTimeout &lt;= 0 </span><span class="cov3" title="3">{
+                cfg.OpenTimeout = 30 * time.Second
+        }</span>
+        <span class="cov4" title="5">return &amp;CircuitBreaker{cfg: cfg, state: CircuitClosed}</span>
+}
+
+// AllowRequest reports whether a Redis call should be attempted now.
+func (cb *CircuitBreaker) AllowRequest() bool <span class="cov10" title="67">{
+        cb.mu.Lock()
+        defer cb.mu.Unlock()
+
+        now := time.Now()
+        switch cb.state </span>{
+        case CircuitClosed:<span class="cov9" title="63">
+                return true</span>
+        case CircuitOpen:<span class="cov3" title="4">
+                if now.Sub(cb.openedAt) &gt;= cb.cfg.OpenTimeout </span><span class="cov2" title="2">{
+                        cb.state = CircuitHalfOpen
+                        cb.halfOpenProbeActive = true
+                        cb.emitStateChange()
+                        return true
+                }</span>
+                <span class="cov2" title="2">return false</span>
+        case CircuitHalfOpen:<span class="cov0" title="0">
+                if cb.halfOpenProbeActive </span><span class="cov0" title="0">{
+                        return false
+                }</span>
+                <span class="cov0" title="0">cb.halfOpenProbeActive = true
+                return true</span>
+        default:<span class="cov0" title="0">
+                return true</span>
+        }
+}
+
+func (cb *CircuitBreaker) OnSuccess() <span class="cov9" title="61">{
+        cb.mu.Lock()
+        defer cb.mu.Unlock()
+        stateChanged := cb.state != CircuitClosed
+        cb.state = CircuitClosed
+        cb.consecutiveFailures = 0
+        cb.halfOpenProbeActive = false
+        if stateChanged </span><span class="cov1" title="1">{
+                cb.emitStateChange()
+        }</span>
+}
+
+func (cb *CircuitBreaker) OnFailure() <span class="cov5" title="7">{
+        cb.mu.Lock()
+        defer cb.mu.Unlock()
+
+        now := time.Now()
+        switch cb.state </span>{
+        case CircuitClosed:<span class="cov4" title="6">
+                cb.consecutiveFailures++
+                if cb.consecutiveFailures &gt;= cb.cfg.OpenAfterFailures </span><span class="cov3" title="3">{
+                        cb.state = CircuitOpen
+                        cb.openedAt = now
+                        cb.halfOpenProbeActive = false
+                        cb.emitStateChange()
+                }</span>
+        case CircuitHalfOpen:<span class="cov1" title="1">
+                cb.state = CircuitOpen
+                cb.openedAt = now
+                cb.halfOpenProbeActive = false
+                cb.emitStateChange()</span>
+        case CircuitOpen:<span class="cov0" title="0">
+                cb.openedAt = now</span>
+        }
+}
+
+func (cb *CircuitBreaker) State() CircuitState <span class="cov5" title="8">{
+        cb.mu.Lock()
+        defer cb.mu.Unlock()
+        return cb.state
+}</span>
+
+func (cb *CircuitBreaker) emitStateChange() <span class="cov5" title="7">{
+        if cb.cfg.OnStateChange != nil </span><span class="cov0" title="0">{
+                cb.cfg.OnStateChange(cb.state, cb.consecutiveFailures)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package limiter
+
+import (
+        "context"
+        "errors"
+        "fmt"
+        "log/slog"
+        "math"
+        "time"
+
+        "github.com/parvpatel20/rate-limiter/internal/store"
+)
+
+var ErrRedisUnavailable = errors.New("redis unavailable")
+
+type HybridConfig struct {
+        FailOpen          bool
+        FastDenyThreshold time.Duration
+        CircuitBreaker    CircuitBreakerConfig
+        Logger            *slog.Logger
+        OnLocalDecision   func(decision string)
+        OnRedisDuration   func(operation string, d time.Duration)
+}
+
+type HybridLimiter struct {
+        local *LocalTokenBucket
+        store store.Store
+        cb    *CircuitBreaker
+        cfg   HybridConfig
+}
+
+func NewHybridLimiter(local *LocalTokenBucket, st store.Store, cfg HybridConfig) *HybridLimiter <span class="cov3" title="4">{
+        if cfg.FastDenyThreshold &lt;= 0 </span><span class="cov3" title="4">{
+                cfg.FastDenyThreshold = 250 * time.Millisecond
+        }</span>
+        <span class="cov3" title="4">if cfg.Logger == nil </span><span class="cov3" title="4">{
+                cfg.Logger = slog.Default()
+        }</span>
+        <span class="cov3" title="4">return &amp;HybridLimiter{
+                local: local,
+                store: st,
+                cb:    NewCircuitBreaker(cfg.CircuitBreaker),
+                cfg:   cfg,
+        }</span>
+}
+
+func (h *HybridLimiter) Allow(ctx context.Context, key string, limit int64, window time.Duration) (Result, error) <span class="cov10" title="77">{
+        localRes, err := h.local.Allow(ctx, key, limit, window)
+        if err != nil </span><span class="cov0" title="0">{
+                return Result{}, err
+        }</span>
+
+        <span class="cov10" title="77">if !localRes.Allowed &amp;&amp; localRes.Remaining == 0 &amp;&amp; localRes.RetryAfter &gt; h.cfg.FastDenyThreshold </span><span class="cov6" title="14">{
+                if h.cfg.OnLocalDecision != nil </span><span class="cov0" title="0">{
+                        h.cfg.OnLocalDecision("fast_deny")
+                }</span>
+                <span class="cov6" title="14">return localRes, nil</span>
+        }
+        <span class="cov9" title="63">if h.cfg.OnLocalDecision != nil </span><span class="cov0" title="0">{
+                h.cfg.OnLocalDecision("redis_needed")
+        }</span>
+
+        <span class="cov9" title="63">if !h.cb.AllowRequest() </span><span class="cov1" title="1">{
+                if h.cfg.FailOpen </span><span class="cov1" title="1">{
+                        if h.cfg.OnLocalDecision != nil </span><span class="cov0" title="0">{
+                                h.cfg.OnLocalDecision("fast_allow")
+                        }</span>
+                        <span class="cov1" title="1">return localRes, nil</span>
+                }
+                <span class="cov0" title="0">return Result{}, ErrRedisUnavailable</span>
+        }
+
+        <span class="cov9" title="62">rate := float64(limit) / window.Seconds()
+        start := time.Now()
+        redisRes, err := h.store.TokenBucketAllow(ctx, key, limit, rate)
+        if h.cfg.OnRedisDuration != nil </span><span class="cov0" title="0">{
+                h.cfg.OnRedisDuration("token_bucket", time.Since(start))
+        }</span>
+        <span class="cov9" title="62">if err != nil </span><span class="cov2" title="2">{
+                h.cb.OnFailure()
+                h.cfg.Logger.Error("redis_error", "event", "redis_error", "error", err, "fallback", "local_only")
+                if h.cfg.FailOpen </span><span class="cov2" title="2">{
+                        if h.cfg.OnLocalDecision != nil </span><span class="cov0" title="0">{
+                                h.cfg.OnLocalDecision("fast_allow")
+                        }</span>
+                        <span class="cov2" title="2">return localRes, nil</span>
+                }
+                <span class="cov0" title="0">return Result{}, fmt.Errorf("hybrid redis allow failed: %w", err)</span>
+        }
+
+        <span class="cov9" title="60">h.cb.OnSuccess()
+        h.syncLocalFromRedis(key, limit, redisRes)
+
+        return Result{
+                Allowed:    redisRes.Allowed,
+                Remaining:  redisRes.Remaining,
+                Limit:      redisRes.Limit,
+                ResetAt:    redisRes.ResetAt,
+                RetryAfter: redisRes.RetryAfter,
+        }, nil</span>
+}
+
+func (h *HybridLimiter) CircuitState() CircuitState <span class="cov1" title="1">{
+        return h.cb.State()
+}</span>
+
+func (h *HybridLimiter) syncLocalFromRedis(key string, limit int64, redisRes store.Result) <span class="cov9" title="60">{
+        if limit &lt;= 0 </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov9" title="60">shard := &amp;h.local.shards[shardIndex(key)]
+        shard.mu.Lock()
+        defer shard.mu.Unlock()
+
+        now := time.Now()
+        b, ok := shard.buckets[key]
+        if !ok </span><span class="cov0" title="0">{
+                b = &amp;bucket{}
+                shard.buckets[key] = b
+        }</span>
+
+        <span class="cov9" title="60">tokens := float64(redisRes.Remaining)
+        if tokens &lt; 0 </span><span class="cov0" title="0">{
+                tokens = 0
+        }</span>
+        <span class="cov9" title="60">if tokens &gt; float64(limit) </span><span class="cov0" title="0">{
+                tokens = float64(limit)
+        }</span>
+        <span class="cov9" title="60">if math.IsNaN(tokens) || math.IsInf(tokens, 0) </span><span class="cov0" title="0">{
+                tokens = 0
+        }</span>
+
+        <span class="cov9" title="60">b.tokens = tokens
+        b.lastRefill = now
+        b.lastAccess = now</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package limiter
+
+import (
+        "context"
+        "strings"
+        "time"
+)
+
+// Descriptor captures all identifying request attributes used for policy resolution.
+type Descriptor struct {
+        TenantID string
+        UserID   string
+        Route    string
+        Method   string
+        Plan     string
+}
+
+// Key builds the canonical composite key used by policy matching and limit tracking.
+func (d Descriptor) Key() string <span class="cov0" title="0">{
+        var b strings.Builder
+        b.Grow(64)
+        b.WriteString("tenant:")
+        b.WriteString(d.TenantID)
+        b.WriteString("|plan:")
+        b.WriteString(d.Plan)
+        b.WriteString("|user:")
+        b.WriteString(d.UserID)
+        b.WriteString("|method:")
+        b.WriteString(d.Method)
+        b.WriteString("|route:")
+        b.WriteString(d.Route)
+        return b.String()
+}</span>
+
+// Result is returned by all limiter implementations and directly maps to HTTP headers.
+type Result struct {
+        Allowed    bool
+        Remaining  int64
+        Limit      int64
+        ResetAt    time.Time
+        RetryAfter time.Duration
+}
+
+// Limiter defines the uniform contract for token bucket, sliding window, and hybrid algorithms.
+type Limiter interface {
+        Allow(ctx context.Context, key string, limit int64, window time.Duration) (Result, error)
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package limiter
+
+import (
+        "context"
+        "hash/fnv"
+        "sync"
+        "time"
+)
+
+const slidingWindowShardCount = 256
+
+type windowEntry struct {
+        timestamps []time.Time
+        lastAccess time.Time
+}
+
+type windowShard struct {
+        mu      sync.Mutex
+        entries map[string]*windowEntry
+}
+
+type LocalSlidingWindow struct {
+        shards [slidingWindowShardCount]windowShard
+}
+
+func NewLocalSlidingWindow() *LocalSlidingWindow <span class="cov2" title="3">{
+        sw := &amp;LocalSlidingWindow{}
+        for i := range sw.shards </span><span class="cov10" title="768">{
+                sw.shards[i].entries = make(map[string]*windowEntry)
+        }</span>
+        <span class="cov2" title="3">return sw</span>
+}
+
+func (sw *LocalSlidingWindow) Allow(ctx context.Context, key string, limit int64, window time.Duration) (Result, error) <span class="cov7" title="107">{
+        select </span>{
+        case &lt;-ctx.Done():<span class="cov0" title="0">
+                return Result{}, ctx.Err()</span>
+        default:<span class="cov7" title="107"></span>
+        }
+
+        <span class="cov7" title="107">now := time.Now()
+        if limit &lt;= 0 || window &lt;= 0 </span><span class="cov0" title="0">{
+                return Result{Allowed: false, Remaining: 0, Limit: limit, ResetAt: now, RetryAfter: window}, nil
+        }</span>
+
+        <span class="cov7" title="107">shard := &amp;sw.shards[slidingShardIndex(key)]
+        shard.mu.Lock()
+        defer shard.mu.Unlock()
+
+        entry, ok := shard.entries[key]
+        if !ok </span><span class="cov2" title="3">{
+                entry = &amp;windowEntry{}
+                shard.entries[key] = entry
+        }</span>
+        <span class="cov7" title="107">entry.lastAccess = now
+
+        cutoff := now.Add(-window)
+        keepFrom := 0
+        for keepFrom &lt; len(entry.timestamps) &amp;&amp; !entry.timestamps[keepFrom].After(cutoff) </span><span class="cov1" title="1">{
+                keepFrom++
+        }</span>
+        <span class="cov7" title="107">if keepFrom &gt; 0 </span><span class="cov1" title="1">{
+                entry.timestamps = append([]time.Time(nil), entry.timestamps[keepFrom:]...)
+        }</span>
+
+        <span class="cov7" title="107">current := int64(len(entry.timestamps))
+        if current &lt; limit </span><span class="cov6" title="55">{
+                entry.timestamps = append(entry.timestamps, now)
+                remaining := limit - int64(len(entry.timestamps))
+                resetAt := now.Add(window)
+                if len(entry.timestamps) &gt; 0 </span><span class="cov6" title="55">{
+                        resetAt = entry.timestamps[0].Add(window)
+                }</span>
+                <span class="cov6" title="55">return Result{Allowed: true, Remaining: remaining, Limit: limit, ResetAt: resetAt}, nil</span>
+        }
+
+        <span class="cov6" title="52">oldest := entry.timestamps[0]
+        retryAfter := oldest.Add(window).Sub(now)
+        if retryAfter &lt; 0 </span><span class="cov0" title="0">{
+                retryAfter = 0
+        }</span>
+        <span class="cov6" title="52">return Result{
+                Allowed:    false,
+                Remaining:  0,
+                Limit:      limit,
+                ResetAt:    now.Add(retryAfter),
+                RetryAfter: retryAfter,
+        }, nil</span>
+}
+
+// Memory note: each time.Time is 24 bytes on 64-bit Go. At 1000 req/min limit,
+// one key may hold up to ~24KB of timestamps in the active window.
+func slidingShardIndex(key string) uint32 <span class="cov7" title="107">{
+        h := fnv.New32a()
+        _, _ = h.Write([]byte(key))
+        return h.Sum32() % slidingWindowShardCount
+}</span>
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package limiter
+
+import (
+        "context"
+        "hash/fnv"
+        "math"
+        "sync"
+        "time"
+)
+
+const tokenBucketShardCount = 256
+
+type bucket struct {
+        tokens     float64
+        lastRefill time.Time
+        lastAccess time.Time
+}
+
+type bucketShard struct {
+        mu      sync.Mutex
+        buckets map[string]*bucket
+}
+
+type LocalTokenBucket struct {
+        shards [tokenBucketShardCount]bucketShard
+}
+
+func NewLocalTokenBucket() *LocalTokenBucket <span class="cov3" title="7">{
+        tb := &amp;LocalTokenBucket{}
+        for i := range tb.shards </span><span class="cov10" title="1792">{
+                tb.shards[i].buckets = make(map[string]*bucket)
+        }</span>
+        <span class="cov3" title="7">return tb</span>
+}
+
+func (tb *LocalTokenBucket) Allow(ctx context.Context, key string, limit int64, window time.Duration) (Result, error) <span class="cov6" title="139">{
+        select </span>{
+        case &lt;-ctx.Done():<span class="cov0" title="0">
+                return Result{}, ctx.Err()</span>
+        default:<span class="cov6" title="139"></span>
+        }
+
+        <span class="cov6" title="139">now := time.Now()
+        if limit &lt;= 0 || window &lt;= 0 </span><span class="cov0" title="0">{
+                return Result{
+                        Allowed:    false,
+                        Remaining:  0,
+                        Limit:      limit,
+                        ResetAt:    now,
+                        RetryAfter: window,
+                }, nil
+        }</span>
+
+        <span class="cov6" title="139">ratePerSecond := float64(limit) / window.Seconds()
+        if ratePerSecond &lt;= 0 </span><span class="cov0" title="0">{
+                return Result{Allowed: false, Remaining: 0, Limit: limit, ResetAt: now, RetryAfter: window}, nil
+        }</span>
+
+        <span class="cov6" title="139">shard := &amp;tb.shards[shardIndex(key)]
+        shard.mu.Lock()
+        defer shard.mu.Unlock()
+
+        b, ok := shard.buckets[key]
+        if !ok </span><span class="cov3" title="7">{
+                b = &amp;bucket{
+                        tokens:     float64(limit),
+                        lastRefill: now,
+                        lastAccess: now,
+                }
+                shard.buckets[key] = b
+        }</span>
+
+        <span class="cov6" title="139">elapsed := now.Sub(b.lastRefill).Seconds()
+        if elapsed &gt; 0 </span><span class="cov6" title="132">{
+                b.tokens += elapsed * ratePerSecond
+                if b.tokens &gt; float64(limit) </span><span class="cov0" title="0">{
+                        b.tokens = float64(limit)
+                }</span>
+                <span class="cov6" title="132">b.lastRefill = now</span>
+        }
+        <span class="cov6" title="139">b.lastAccess = now
+
+        if b.tokens &gt;= 1 </span><span class="cov6" title="123">{
+                b.tokens -= 1
+                remaining := int64(math.Floor(b.tokens))
+                resetAfter := time.Duration((float64(limit) - b.tokens) / ratePerSecond * float64(time.Second))
+                return Result{
+                        Allowed:   true,
+                        Remaining: remaining,
+                        Limit:     limit,
+                        ResetAt:   now.Add(resetAfter),
+                }, nil
+        }</span>
+
+        <span class="cov4" title="16">retryAfter := time.Duration((1 - b.tokens) / ratePerSecond * float64(time.Second))
+        if retryAfter &lt; 0 </span><span class="cov0" title="0">{
+                retryAfter = 0
+        }</span>
+        <span class="cov4" title="16">return Result{
+                Allowed:    false,
+                Remaining:  0,
+                Limit:      limit,
+                ResetAt:    now.Add(retryAfter),
+                RetryAfter: retryAfter,
+        }, nil</span>
+}
+
+// Cleanup removes stale buckets not accessed within the provided duration.
+func (tb *LocalTokenBucket) Cleanup(olderThan time.Duration) <span class="cov0" title="0">{
+        _, _ = tb.CleanupStats(olderThan)
+}</span>
+
+// CleanupStats removes stale buckets and returns (evicted, remaining) counts.
+func (tb *LocalTokenBucket) CleanupStats(olderThan time.Duration) (int, int) <span class="cov0" title="0">{
+        cutoff := time.Now().Add(-olderThan)
+        evicted := 0
+        remaining := 0
+        for i := range tb.shards </span><span class="cov0" title="0">{
+                shard := &amp;tb.shards[i]
+                shard.mu.Lock()
+                for key, b := range shard.buckets </span><span class="cov0" title="0">{
+                        if b.lastAccess.Before(cutoff) </span><span class="cov0" title="0">{
+                                delete(shard.buckets, key)
+                                evicted++
+                        }</span>
+                }
+                <span class="cov0" title="0">remaining += len(shard.buckets)
+                shard.mu.Unlock()</span>
+        }
+        <span class="cov0" title="0">return evicted, remaining</span>
+}
+
+func (tb *LocalTokenBucket) ActiveKeys() int <span class="cov0" title="0">{
+        total := 0
+        for i := range tb.shards </span><span class="cov0" title="0">{
+                shard := &amp;tb.shards[i]
+                shard.mu.Lock()
+                total += len(shard.buckets)
+                shard.mu.Unlock()
+        }</span>
+        <span class="cov0" title="0">return total</span>
+}
+
+func shardIndex(key string) uint32 <span class="cov7" title="199">{
+        h := fnv.New32a()
+        _, _ = h.Write([]byte(key))
+        return h.Sum32() % tokenBucketShardCount
+}</span>
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package logging
+
+import (
+        "context"
+        "log/slog"
+        "os"
+        "strings"
+)
+
+type contextKey string
+
+const (
+        tenantIDKey contextKey = "tenant_id"
+        traceIDKey  contextKey = "trace_id"
+        routeKey    contextKey = "route"
+)
+
+func NewLogger(appEnv string) *slog.Logger <span class="cov0" title="0">{
+        if strings.EqualFold(appEnv, "production") </span><span class="cov0" title="0">{
+                return slog.New(slog.NewJSONHandler(os.Stdout, nil))
+        }</span>
+        <span class="cov0" title="0">return slog.New(slog.NewTextHandler(os.Stdout, nil))</span>
+}
+
+func WithRequestValues(ctx context.Context, tenantID, traceID, route string) context.Context <span class="cov0" title="0">{
+        ctx = context.WithValue(ctx, tenantIDKey, tenantID)
+        ctx = context.WithValue(ctx, traceIDKey, traceID)
+        ctx = context.WithValue(ctx, routeKey, route)
+        return ctx
+}</span>
+
+func RequestAttrs(ctx context.Context) []any <span class="cov0" title="0">{
+        attrs := make([]any, 0, 6)
+        if tenantID, _ := ctx.Value(tenantIDKey).(string); tenantID != "" </span><span class="cov0" title="0">{
+                attrs = append(attrs, "tenant_id", tenantID)
+        }</span>
+        <span class="cov0" title="0">if traceID, _ := ctx.Value(traceIDKey).(string); traceID != "" </span><span class="cov0" title="0">{
+                attrs = append(attrs, "trace_id", traceID)
+        }</span>
+        <span class="cov0" title="0">if route, _ := ctx.Value(routeKey).(string); route != "" </span><span class="cov0" title="0">{
+                attrs = append(attrs, "route", route)
+        }</span>
+        <span class="cov0" title="0">return attrs</span>
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package metrics
+
+import (
+        "context"
+        "strings"
+        "time"
+
+        "github.com/parvpatel20/rate-limiter/internal/limiter"
+        "github.com/prometheus/client_golang/prometheus"
+)
+
+type Metrics struct {
+        RequestsTotal        *prometheus.CounterVec
+        RedisDurationSeconds *prometheus.HistogramVec
+        LocalDecisionsTotal  *prometheus.CounterVec
+        PolicyCacheHitsTotal *prometheus.CounterVec
+        CircuitBreakerState  prometheus.Gauge
+        ActiveKeys           prometheus.Gauge
+}
+
+func New(reg prometheus.Registerer) *Metrics <span class="cov1" title="1">{
+        m := &amp;Metrics{
+                RequestsTotal: prometheus.NewCounterVec(prometheus.CounterOpts{
+                        Name: "ratelimit_requests_total",
+                        Help: "Total number of rate-limit middleware checks partitioned by tenant, route, and result.",
+                }, []string{"tenant", "route", "result"}),
+                RedisDurationSeconds: prometheus.NewHistogramVec(prometheus.HistogramOpts{
+                        Name:    "ratelimit_redis_duration_seconds",
+                        Help:    "Latency distribution of Redis operations used by rate limiting.",
+                        Buckets: []float64{0.001, 0.005, 0.01, 0.025, 0.05, 0.1},
+                }, []string{"operation"}),
+                LocalDecisionsTotal: prometheus.NewCounterVec(prometheus.CounterOpts{
+                        Name: "ratelimit_local_decisions_total",
+                        Help: "Count of local pre-decisions indicating whether Redis was needed.",
+                }, []string{"decision"}),
+                PolicyCacheHitsTotal: prometheus.NewCounterVec(prometheus.CounterOpts{
+                        Name: "ratelimit_policy_cache_hits_total",
+                        Help: "Count of policy resolution outcomes indicating direct/fallback matches.",
+                }, []string{"outcome"}),
+                CircuitBreakerState: prometheus.NewGauge(prometheus.GaugeOpts{
+                        Name: "ratelimit_circuit_breaker_state",
+                        Help: "Circuit breaker state where 0=closed, 1=open, 2=half-open.",
+                }),
+                ActiveKeys: prometheus.NewGauge(prometheus.GaugeOpts{
+                        Name: "ratelimit_active_keys",
+                        Help: "Number of active in-memory rate-limit keys currently tracked.",
+                }),
+        }
+        reg.MustRegister(
+                m.RequestsTotal,
+                m.RedisDurationSeconds,
+                m.LocalDecisionsTotal,
+                m.PolicyCacheHitsTotal,
+                m.CircuitBreakerState,
+                m.ActiveKeys,
+        )
+        m.CircuitBreakerState.Set(0)
+        return m
+}</span>
+
+func (m *Metrics) ObserveCircuitState(state limiter.CircuitState) <span class="cov0" title="0">{
+        switch state </span>{
+        case limiter.CircuitOpen:<span class="cov0" title="0">
+                m.CircuitBreakerState.Set(1)</span>
+        case limiter.CircuitHalfOpen:<span class="cov0" title="0">
+                m.CircuitBreakerState.Set(2)</span>
+        default:<span class="cov0" title="0">
+                m.CircuitBreakerState.Set(0)</span>
+        }
+}
+
+func (m *Metrics) WrapLimiter(l limiter.Limiter) limiter.Limiter <span class="cov3" title="2">{
+        if l == nil </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+        <span class="cov3" title="2">return &amp;instrumentedLimiter{next: l, m: m}</span>
+}
+
+type instrumentedLimiter struct {
+        next limiter.Limiter
+        m    *Metrics
+}
+
+func (i *instrumentedLimiter) Allow(ctx context.Context, key string, limit int64, window time.Duration) (limiter.Result, error) <span class="cov3" title="2">{
+        tenant, route := tenantAndRouteFromKey(key)
+        resultLabel := "error"
+        res, err := i.next.Allow(ctx, key, limit, window)
+        if err == nil </span><span class="cov3" title="2">{
+                if res.Allowed </span><span class="cov1" title="1">{
+                        resultLabel = "allowed"
+                }</span> else<span class="cov1" title="1"> {
+                        resultLabel = "denied"
+                }</span>
+        }
+        <span class="cov3" title="2">i.m.RequestsTotal.WithLabelValues(tenant, route, resultLabel).Inc()
+        return res, err</span>
+}
+
+func tenantAndRouteFromKey(key string) (string, string) <span class="cov3" title="2">{
+        tenant := "unknown"
+        route := "unknown"
+        parts := strings.Split(key, "|")
+        for _, p := range parts </span><span class="cov10" title="10">{
+                if strings.HasPrefix(p, "tenant:") </span><span class="cov3" title="2">{
+                        tenant = strings.TrimPrefix(p, "tenant:")
+                }</span>
+                <span class="cov10" title="10">if strings.HasPrefix(p, "route:") </span><span class="cov3" title="2">{
+                        route = strings.TrimPrefix(p, "route:")
+                }</span>
+        }
+        <span class="cov3" title="2">if tenant == "" </span><span class="cov0" title="0">{
+                tenant = "unknown"
+        }</span>
+        <span class="cov3" title="2">if route == "" </span><span class="cov0" title="0">{
+                route = "unknown"
+        }</span>
+        <span class="cov3" title="2">return tenant, route</span>
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package policy
+
+import "strings"
+
+var orderedFields = []string{"tenant", "plan", "user", "method", "route"}
+
+// CandidateKeys returns descriptor fallback attempts in strict priority order.
+func CandidateKeys(fullKey string) []string <span class="cov4" title="8">{
+        parts := parseKey(fullKey)
+        if len(parts) == 0 </span><span class="cov0" title="0">{
+                return []string{"global:default"}
+        }</span>
+
+        <span class="cov4" title="8">candidates := make([]string, 0, 7)
+        push := func(v string) </span><span class="cov6" title="56">{
+                if v == "" </span><span class="cov0" title="0">{
+                        return
+                }</span>
+                <span class="cov6" title="56">for _, existing := range candidates </span><span class="cov8" title="168">{
+                        if existing == v </span><span class="cov0" title="0">{
+                                return
+                        }</span>
+                }
+                <span class="cov6" title="56">candidates = append(candidates, v)</span>
+        }
+
+        <span class="cov4" title="8">push(build(parts, "tenant", "plan", "user", "method", "route"))
+        push(build(parts, "tenant", "plan", "user", "route"))
+        push(build(parts, "tenant", "plan", "method", "route"))
+        push(build(parts, "tenant", "plan", "user", "method"))
+        if plan, ok := parts["plan"]; ok </span><span class="cov4" title="8">{
+                push("plan:" + plan)
+        }</span>
+        <span class="cov4" title="8">if tenant, ok := parts["tenant"]; ok </span><span class="cov4" title="8">{
+                push("tenant:" + tenant)
+        }</span>
+        <span class="cov4" title="8">push("global:default")
+
+        return candidates</span>
+}
+
+// ResolveWithMatcher finds the first matching policy using the fixed fallback order.
+func ResolveWithMatcher(policies map[string]Policy, fullKey string) (Policy, bool) <span class="cov4" title="8">{
+        for _, candidate := range CandidateKeys(fullKey) </span><span class="cov6" title="35">{
+                if p, ok := policies[candidate]; ok </span><span class="cov3" title="7">{
+                        return p, true
+                }</span>
+        }
+        <span class="cov1" title="1">return Policy{}, false</span>
+}
+
+func parseKey(key string) map[string]string <span class="cov4" title="8">{
+        parts := make(map[string]string, 5)
+        segments := strings.Split(key, "|")
+        for _, seg := range segments </span><span class="cov6" title="40">{
+                if seg == "" </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+                <span class="cov6" title="40">kv := strings.SplitN(seg, ":", 2)
+                if len(kv) != 2 </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+                <span class="cov6" title="40">parts[strings.TrimSpace(kv[0])] = kv[1]</span>
+        }
+        <span class="cov4" title="8">return parts</span>
+}
+
+func build(parts map[string]string, keys ...string) string <span class="cov6" title="32">{
+        out := make([]string, 0, len(keys))
+        for _, want := range orderedFields </span><span class="cov8" title="160">{
+                if !contains(keys, want) </span><span class="cov5" title="24">{
+                        continue</span>
+                }
+                <span class="cov8" title="136">value, ok := parts[want]
+                if !ok </span><span class="cov0" title="0">{
+                        return ""
+                }</span>
+                <span class="cov8" title="136">out = append(out, want+":"+value)</span>
+        }
+        <span class="cov6" title="32">if len(out) == 0 </span><span class="cov0" title="0">{
+                return ""
+        }</span>
+        <span class="cov6" title="32">return strings.Join(out, "|")</span>
+}
+
+func contains(items []string, target string) bool <span class="cov8" title="160">{
+        for _, item := range items </span><span class="cov10" title="456">{
+                if item == target </span><span class="cov8" title="136">{
+                        return true
+                }</span>
+        }
+        <span class="cov5" title="24">return false</span>
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package policy
+
+import (
+        "fmt"
+        "os"
+        "sync"
+
+        "gopkg.in/yaml.v3"
+)
+
+type yamlFile struct {
+        Policies []Policy `yaml:"policies"`
+}
+
+type YAMLStore struct {
+        path string
+
+        mu       sync.RWMutex
+        policies map[string]Policy
+}
+
+// List returns a snapshot copy of all currently loaded policies.
+func (s *YAMLStore) List() []Policy <span class="cov0" title="0">{
+        s.mu.RLock()
+        defer s.mu.RUnlock()
+        out := make([]Policy, 0, len(s.policies))
+        for _, p := range s.policies </span><span class="cov0" title="0">{
+                out = append(out, p)
+        }</span>
+        <span class="cov0" title="0">return out</span>
+}
+
+func NewYAMLStore(path string) (*YAMLStore, error) <span class="cov0" title="0">{
+        s := &amp;YAMLStore{
+                path:     path,
+                policies: make(map[string]Policy),
+        }
+        if err := s.Reload(); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return s, nil</span>
+}
+
+func (s *YAMLStore) Resolve(key string) (Policy, bool) <span class="cov0" title="0">{
+        s.mu.RLock()
+        defer s.mu.RUnlock()
+        return ResolveWithMatcher(s.policies, key)
+}</span>
+
+func (s *YAMLStore) Reload() error <span class="cov0" title="0">{
+        raw, err := os.ReadFile(s.path)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("read policies file: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">var data yamlFile
+        if err := yaml.Unmarshal(raw, &amp;data); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("parse policies yaml: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">next := make(map[string]Policy, len(data.Policies))
+        for _, p := range data.Policies </span><span class="cov0" title="0">{
+                if p.Descriptor == "" </span><span class="cov0" title="0">{
+                        return fmt.Errorf("policy %q has empty descriptor", p.Name)
+                }</span>
+                <span class="cov0" title="0">if p.Limit &lt;= 0 </span><span class="cov0" title="0">{
+                        return fmt.Errorf("policy %q has non-positive limit", p.Name)
+                }</span>
+                <span class="cov0" title="0">if p.WindowSeconds &lt;= 0 </span><span class="cov0" title="0">{
+                        return fmt.Errorf("policy %q has non-positive window_seconds", p.Name)
+                }</span>
+                <span class="cov0" title="0">if p.Algorithm != "token_bucket" &amp;&amp; p.Algorithm != "sliding_window" </span><span class="cov0" title="0">{
+                        return fmt.Errorf("policy %q has unsupported algorithm %q", p.Name, p.Algorithm)
+                }</span>
+                <span class="cov0" title="0">next[p.Descriptor] = p</span>
+        }
+
+        <span class="cov0" title="0">s.mu.Lock()
+        s.policies = next
+        s.mu.Unlock()
+        return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">package store
+
+import (
+        "context"
+        "math"
+        "sync"
+        "time"
+)
+
+type memBucket struct {
+        tokens     float64
+        lastRefill time.Time
+}
+
+type memCounter struct {
+        count     int64
+        expiresAt time.Time
+}
+
+type MemoryStore struct {
+        mu       sync.Mutex
+        buckets  map[string]*memBucket
+        counters map[string]*memCounter
+}
+
+func NewMemoryStore() *MemoryStore <span class="cov0" title="0">{
+        return &amp;MemoryStore{
+                buckets:  make(map[string]*memBucket),
+                counters: make(map[string]*memCounter),
+        }
+}</span>
+
+func (s *MemoryStore) IncrBy(ctx context.Context, key string, amount int64, window time.Duration) (int64, error) <span class="cov0" title="0">{
+        select </span>{
+        case &lt;-ctx.Done():<span class="cov0" title="0">
+                return 0, ctx.Err()</span>
+        default:<span class="cov0" title="0"></span>
+        }
+
+        <span class="cov0" title="0">now := time.Now()
+        s.mu.Lock()
+        defer s.mu.Unlock()
+
+        counter, ok := s.counters[key]
+        if !ok || now.After(counter.expiresAt) </span><span class="cov0" title="0">{
+                counter = &amp;memCounter{count: 0, expiresAt: now.Add(window)}
+                s.counters[key] = counter
+        }</span>
+        <span class="cov0" title="0">counter.count += amount
+        return counter.count, nil</span>
+}
+
+func (s *MemoryStore) TokenBucketAllow(ctx context.Context, key string, limit int64, rate float64) (Result, error) <span class="cov0" title="0">{
+        select </span>{
+        case &lt;-ctx.Done():<span class="cov0" title="0">
+                return Result{}, ctx.Err()</span>
+        default:<span class="cov0" title="0"></span>
+        }
+
+        <span class="cov0" title="0">now := time.Now()
+        if limit &lt;= 0 || rate &lt;= 0 </span><span class="cov0" title="0">{
+                return Result{Allowed: false, Remaining: 0, Limit: limit, ResetAt: now, RetryAfter: 0}, nil
+        }</span>
+
+        <span class="cov0" title="0">s.mu.Lock()
+        defer s.mu.Unlock()
+
+        b, ok := s.buckets[key]
+        if !ok </span><span class="cov0" title="0">{
+                b = &amp;memBucket{tokens: float64(limit), lastRefill: now}
+                s.buckets[key] = b
+        }</span>
+
+        <span class="cov0" title="0">elapsedSeconds := now.Sub(b.lastRefill).Seconds()
+        if elapsedSeconds &gt; 0 </span><span class="cov0" title="0">{
+                b.tokens += elapsedSeconds * rate
+                if b.tokens &gt; float64(limit) </span><span class="cov0" title="0">{
+                        b.tokens = float64(limit)
+                }</span>
+                <span class="cov0" title="0">b.lastRefill = now</span>
+        }
+
+        <span class="cov0" title="0">if b.tokens &gt;= 1 </span><span class="cov0" title="0">{
+                b.tokens -= 1
+                remaining := int64(math.Floor(b.tokens))
+                resetAfter := time.Duration((float64(limit) - b.tokens) / rate * float64(time.Second))
+                return Result{Allowed: true, Remaining: remaining, Limit: limit, ResetAt: now.Add(resetAfter)}, nil
+        }</span>
+
+        <span class="cov0" title="0">retryAfter := time.Duration((1 - b.tokens) / rate * float64(time.Second))
+        if retryAfter &lt; 0 </span><span class="cov0" title="0">{
+                retryAfter = 0
+        }</span>
+        <span class="cov0" title="0">return Result{Allowed: false, Remaining: 0, Limit: limit, ResetAt: now.Add(retryAfter), RetryAfter: retryAfter}, nil</span>
+}
+
+func (s *MemoryStore) Close() error <span class="cov0" title="0">{
+        return nil
+}</span>
+</pre>
+		
+		<pre class="file" id="file15" style="display: none">package store
+
+import (
+        "context"
+        "fmt"
+        "math"
+        "strconv"
+        "time"
+
+        "github.com/redis/go-redis/v9"
+)
+
+const tokenBucketScript = `
+local key = KEYS[1]
+local limit = tonumber(ARGV[1])
+local rate = tonumber(ARGV[2])
+local now_ms = tonumber(ARGV[3])
+local ttl_ms = tonumber(ARGV[4])
+
+if (limit &lt;= 0) or (rate &lt;= 0) then
+  return {0, 0, limit, now_ms, 0}
+end
+
+local data = redis.call('HMGET', key, 'tokens', 'last_refill_ms')
+local tokens = tonumber(data[1])
+local last_refill_ms = tonumber(data[2])
+
+if (tokens == nil) or (last_refill_ms == nil) then
+  tokens = limit
+  last_refill_ms = now_ms
+end
+
+local elapsed_ms = now_ms - last_refill_ms
+if elapsed_ms &lt; 0 then
+  elapsed_ms = 0
+end
+
+local refill = (elapsed_ms / 1000.0) * rate
+tokens = math.min(limit, tokens + refill)
+
+local allowed = 0
+if tokens &gt;= 1 then
+  tokens = tokens - 1
+  allowed = 1
+end
+
+local remaining = math.floor(tokens)
+local retry_after_ms = 0
+if allowed == 0 then
+  retry_after_ms = math.ceil(((1 - tokens) / rate) * 1000)
+  if retry_after_ms &lt; 0 then
+    retry_after_ms = 0
+  end
+end
+
+local reset_after_ms = math.ceil(((limit - tokens) / rate) * 1000)
+if reset_after_ms &lt; 0 then
+  reset_after_ms = 0
+end
+local reset_at_ms = now_ms + reset_after_ms
+
+redis.call('HMSET', key, 'tokens', tokens, 'last_refill_ms', now_ms)
+redis.call('PEXPIRE', key, ttl_ms)
+
+return {allowed, remaining, limit, reset_at_ms, retry_after_ms}
+`
+
+const slidingWindowCounterScript = `
+local key = KEYS[1]
+local amount = tonumber(ARGV[1])
+local window_ms = tonumber(ARGV[2])
+
+local count = redis.call('INCRBY', key, amount)
+if count == amount then
+  redis.call('PEXPIRE', key, window_ms)
+end
+return count
+`
+
+type RedisStore struct {
+        client *redis.Client
+}
+
+func NewRedisStore(redisURL string) (*RedisStore, error) <span class="cov3" title="4">{
+        opt, err := redis.ParseURL(redisURL)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("parse redis url: %w", err)
+        }</span>
+        <span class="cov3" title="4">if opt.MaxRetries == 0 </span><span class="cov3" title="4">{
+                opt.MaxRetries = 1
+        }</span>
+        <span class="cov3" title="4">if opt.DialTimeout == 0 </span><span class="cov3" title="4">{
+                opt.DialTimeout = 50 * time.Millisecond
+        }</span>
+        <span class="cov3" title="4">if opt.ReadTimeout == 0 </span><span class="cov3" title="4">{
+                opt.ReadTimeout = 50 * time.Millisecond
+        }</span>
+        <span class="cov3" title="4">if opt.WriteTimeout == 0 </span><span class="cov3" title="4">{
+                opt.WriteTimeout = 50 * time.Millisecond
+        }</span>
+        <span class="cov3" title="4">if opt.PoolTimeout == 0 </span><span class="cov3" title="4">{
+                opt.PoolTimeout = 50 * time.Millisecond
+        }</span>
+        <span class="cov3" title="4">client := redis.NewClient(opt)
+        return &amp;RedisStore{client: client}, nil</span>
+}
+
+func (s *RedisStore) IncrBy(ctx context.Context, key string, amount int64, window time.Duration) (int64, error) <span class="cov2" title="2">{
+        res, err := s.client.Eval(ctx, slidingWindowCounterScript, []string{key}, amount, window.Milliseconds()).Result()
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, fmt.Errorf("redis sliding window incr failed for key %q: %w", key, err)
+        }</span>
+        <span class="cov2" title="2">count, err := asInt64(res)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, fmt.Errorf("redis sliding window incr parse failed for key %q: %w", key, err)
+        }</span>
+        <span class="cov2" title="2">return count, nil</span>
+}
+
+func (s *RedisStore) TokenBucketAllow(ctx context.Context, key string, limit int64, rate float64) (Result, error) <span class="cov7" title="102">{
+        now := time.Now()
+        if limit &lt;= 0 || rate &lt;= 0 </span><span class="cov0" title="0">{
+                return Result{Allowed: false, Remaining: 0, Limit: limit, ResetAt: now, RetryAfter: 0}, nil
+        }</span>
+
+        <span class="cov7" title="102">windowSeconds := float64(limit) / rate
+        ttl := time.Duration(windowSeconds * 2 * float64(time.Second))
+        if ttl &lt;= 0 </span><span class="cov0" title="0">{
+                ttl = 2 * time.Second
+        }</span>
+
+        <span class="cov7" title="102">raw, err := s.client.Eval(ctx, tokenBucketScript, []string{key}, limit, rate, now.UnixMilli(), ttl.Milliseconds()).Result()
+        if err != nil </span><span class="cov3" title="4">{
+                return Result{}, fmt.Errorf("redis token bucket script failed for key %q: %w", key, err)
+        }</span>
+
+        <span class="cov7" title="98">arr, ok := raw.([]interface{})
+        if !ok || len(arr) != 5 </span><span class="cov0" title="0">{
+                return Result{}, fmt.Errorf("redis token bucket script returned unexpected shape for key %q", key)
+        }</span>
+
+        <span class="cov7" title="98">allowedInt, err := asInt64(arr[0])
+        if err != nil </span><span class="cov0" title="0">{
+                return Result{}, fmt.Errorf("redis token bucket parse allowed failed for key %q: %w", key, err)
+        }</span>
+        <span class="cov7" title="98">remaining, err := asInt64(arr[1])
+        if err != nil </span><span class="cov0" title="0">{
+                return Result{}, fmt.Errorf("redis token bucket parse remaining failed for key %q: %w", key, err)
+        }</span>
+        <span class="cov7" title="98">limitOut, err := asInt64(arr[2])
+        if err != nil </span><span class="cov0" title="0">{
+                return Result{}, fmt.Errorf("redis token bucket parse limit failed for key %q: %w", key, err)
+        }</span>
+        <span class="cov7" title="98">resetAtMS, err := asInt64(arr[3])
+        if err != nil </span><span class="cov0" title="0">{
+                return Result{}, fmt.Errorf("redis token bucket parse reset_at failed for key %q: %w", key, err)
+        }</span>
+        <span class="cov7" title="98">retryAfterMS, err := asInt64(arr[4])
+        if err != nil </span><span class="cov0" title="0">{
+                return Result{}, fmt.Errorf("redis token bucket parse retry_after failed for key %q: %w", key, err)
+        }</span>
+
+        <span class="cov7" title="98">if remaining &lt; 0 </span><span class="cov0" title="0">{
+                remaining = 0
+        }</span>
+        <span class="cov7" title="98">if remaining &gt; limitOut </span><span class="cov0" title="0">{
+                remaining = limitOut
+        }</span>
+
+        <span class="cov7" title="98">return Result{
+                Allowed:    allowedInt == 1,
+                Remaining:  remaining,
+                Limit:      limitOut,
+                ResetAt:    time.UnixMilli(resetAtMS),
+                RetryAfter: time.Duration(math.Max(float64(retryAfterMS), 0)) * time.Millisecond,
+        }, nil</span>
+}
+
+func (s *RedisStore) Close() error <span class="cov3" title="4">{
+        return s.client.Close()
+}</span>
+
+func asInt64(v interface{}) (int64, error) <span class="cov10" title="492">{
+        switch x := v.(type) </span>{
+        case int64:<span class="cov10" title="492">
+                return x, nil</span>
+        case int:<span class="cov0" title="0">
+                return int64(x), nil</span>
+        case float64:<span class="cov0" title="0">
+                return int64(x), nil</span>
+        case string:<span class="cov0" title="0">
+                n, err := strconv.ParseInt(x, 10, 64)
+                if err != nil </span><span class="cov0" title="0">{
+                        return 0, err
+                }</span>
+                <span class="cov0" title="0">return n, nil</span>
+        default:<span class="cov0" title="0">
+                return 0, fmt.Errorf("unexpected numeric type %T", v)</span>
+        }
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

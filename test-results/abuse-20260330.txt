@@ -1,0 +1,29 @@
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 601637  10001.367689/s
+    checks_succeeded...: 100.00% 601637 out of 601637
+    checks_failed......: 0.00%   0 out of 601637
+
+    ✓ good tenant status is 200
+    ✓ bad tenant returns 200 or 429
+
+    HTTP
+    http_req_duration..............: avg=88ms     min=149.78µs med=70.04ms max=790.2ms  p(90)=173.43ms p(95)=211.92ms
+      { expected_response:true }...: avg=105.88ms min=706.76µs med=87.58ms max=565.08ms p(90)=194.29ms p(95)=236.12ms
+    http_req_failed................: 97.88% 588891 out of 601637
+    http_reqs......................: 601637 10001.367689/s
+
+    EXECUTION
+    iteration_duration.............: avg=103.5ms  min=234.32µs med=80.94ms max=790.3ms  p(90)=203.44ms p(95)=249.15ms
+    iterations.....................: 601637 10001.367689/s
+    vus............................: 1050   min=1050             max=1050
+    vus_max........................: 1050   min=1050             max=1050
+
+    NETWORK
+    data_received..................: 162 MB 2.7 MB/s
+    data_sent......................: 73 MB  1.2 MB/s
+
+
+

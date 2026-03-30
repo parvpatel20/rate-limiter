@@ -1,0 +1,44 @@
+services:
+  ratelimitd:
+    build: .
+    container_name: ratelimitd
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: ratelimit-redis
+    ports:
+      - "6379:6379"
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: ratelimit-prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    volumes:
+      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9091:9090"
+    depends_on:
+      - ratelimitd
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: ratelimit-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./configs/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./configs/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./configs/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus

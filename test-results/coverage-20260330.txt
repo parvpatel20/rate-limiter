@@ -1,0 +1,8 @@
+	github.com/parvpatel20/rate-limiter/internal/config		coverage: 0.0% of statements
+ok  	github.com/parvpatel20/rate-limiter/internal/http	1.373s	coverage: 64.5% of statements
+	github.com/parvpatel20/rate-limiter/internal/keybuild		coverage: 0.0% of statements
+ok  	github.com/parvpatel20/rate-limiter/internal/limiter	1.659s	coverage: 71.0% of statements
+	github.com/parvpatel20/rate-limiter/internal/logging		coverage: 0.0% of statements
+ok  	github.com/parvpatel20/rate-limiter/internal/metrics	1.031s	coverage: 78.8% of statements
+ok  	github.com/parvpatel20/rate-limiter/internal/policy	1.023s	coverage: 51.2% of statements
+ok  	github.com/parvpatel20/rate-limiter/internal/store	1.248s	coverage: 43.3% of statements

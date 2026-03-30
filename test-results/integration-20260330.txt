@@ -1,0 +1,3 @@
+FAIL	./test/integration [setup failed]
+FAIL
+exit_code=0

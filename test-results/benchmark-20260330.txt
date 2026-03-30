@@ -1,0 +1,9 @@
+goos: linux
+goarch: amd64
+pkg: github.com/parvpatel20/rate-limiter/test/bench
+cpu: Intel(R) Core(TM) i5-6300U CPU @ 2.40GHz
+BenchmarkLocalTokenBucket-4      	52296052	       248.9 ns/op	       0 B/op	       0 allocs/op
+BenchmarkHybridWithMiniredis-4   	   43594	    263428 ns/op	  215726 B/op	     871 allocs/op
+BenchmarkPolicyResolve-4         	 2890635	      3651 ns/op	    1464 B/op	      36 allocs/op
+PASS
+ok  	github.com/parvpatel20/rate-limiter/test/bench	42.314s

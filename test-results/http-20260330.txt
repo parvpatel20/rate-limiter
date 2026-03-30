@@ -1,0 +1,19 @@
+=== RUN   TestAdminAPI_CheckDoesNotPolluteRealKey
+--- PASS: TestAdminAPI_CheckDoesNotPolluteRealKey (0.03s)
+=== RUN   TestAdminAPI_ReloadAuth
+--- PASS: TestAdminAPI_ReloadAuth (0.00s)
+=== RUN   TestAdminAPI_SimulateAndPoliciesEndpoints
+--- PASS: TestAdminAPI_SimulateAndPoliciesEndpoints (0.00s)
+=== RUN   TestMiddlewarePolicyResolveWithRealYAMLStore
+--- PASS: TestMiddlewarePolicyResolveWithRealYAMLStore (0.00s)
+=== RUN   TestMiddleware_DeniedIncludesHeaders
+2026/03/30 18:13:04 WARN rate_limit_denied tenant_id=acme trace_id=f41d71216203b11b route=/v1/search event=rate_limit_denied result=denied remaining=0 retry_after=2s latency_ms=0
+--- PASS: TestMiddleware_DeniedIncludesHeaders (0.00s)
+=== RUN   TestMiddleware_AllowedPreservesDownstreamStatusAndHeaders
+--- PASS: TestMiddleware_AllowedPreservesDownstreamStatusAndHeaders (0.00s)
+=== RUN   TestMiddleware_FailureOpenAndFailureClosed
+2026/03/30 18:13:04 WARN rate_limit_error_open tenant_id=acme trace_id=e418a8f9aef9a969 route=/v1/search result=error latency_ms=0 event=rate_limit_error error=boom
+2026/03/30 18:13:04 WARN rate_limit_error_closed tenant_id=acme trace_id=8b0883b80c4af67c route=/v1/search result=error latency_ms=0 event=rate_limit_error error=boom
+--- PASS: TestMiddleware_FailureOpenAndFailureClosed (0.00s)
+PASS
+ok  	github.com/parvpatel20/rate-limiter/internal/http	0.039s

@@ -1,0 +1,30 @@
+policies:
+  - name: global_default
+    descriptor: global:default
+    limit: 100
+    window_seconds: 60
+    algorithm: token_bucket
+
+  - name: free_plan
+    descriptor: plan:free
+    limit: 60
+    window_seconds: 60
+    algorithm: token_bucket
+
+  - name: enterprise_plan
+    descriptor: plan:enterprise
+    limit: 1000
+    window_seconds: 60
+    algorithm: token_bucket
+
+  - name: login_route_sliding
+    descriptor: tenant:acme|plan:enterprise|method:POST|route:/v1/login
+    limit: 10
+    window_seconds: 60
+    algorithm: sliding_window
+
+  - name: specific_user_override
+    descriptor: tenant:acme|plan:enterprise|user:42|method:POST|route:/v1/search
+    limit: 200
+    window_seconds: 60
+    algorithm: token_bucket

@@ -1,0 +1,84 @@
+?   	github.com/parvpatel20/rate-limiter/internal/config	[no test files]
+=== RUN   TestAdminAPI_CheckDoesNotPolluteRealKey
+--- PASS: TestAdminAPI_CheckDoesNotPolluteRealKey (0.19s)
+=== RUN   TestAdminAPI_ReloadAuth
+--- PASS: TestAdminAPI_ReloadAuth (0.00s)
+=== RUN   TestAdminAPI_SimulateAndPoliciesEndpoints
+--- PASS: TestAdminAPI_SimulateAndPoliciesEndpoints (0.00s)
+=== RUN   TestMiddlewarePolicyResolveWithRealYAMLStore
+--- PASS: TestMiddlewarePolicyResolveWithRealYAMLStore (0.00s)
+=== RUN   TestMiddleware_DeniedIncludesHeaders
+2026/03/30 18:10:26 WARN rate_limit_denied tenant_id=acme trace_id=4ade928deed33652 route=/v1/search event=rate_limit_denied result=denied remaining=0 retry_after=2s latency_ms=0
+--- PASS: TestMiddleware_DeniedIncludesHeaders (0.00s)
+=== RUN   TestMiddleware_AllowedPreservesDownstreamStatusAndHeaders
+--- PASS: TestMiddleware_AllowedPreservesDownstreamStatusAndHeaders (0.00s)
+=== RUN   TestMiddleware_FailureOpenAndFailureClosed
+2026/03/30 18:10:26 WARN rate_limit_error_open tenant_id=acme trace_id=7c346517c5cf1569 route=/v1/search result=error latency_ms=0 event=rate_limit_error error=boom
+2026/03/30 18:10:26 WARN rate_limit_error_closed tenant_id=acme trace_id=0a6a3653c2651199 route=/v1/search result=error latency_ms=0 event=rate_limit_error error=boom
+--- PASS: TestMiddleware_FailureOpenAndFailureClosed (0.00s)
+PASS
+ok  	github.com/parvpatel20/rate-limiter/internal/http	1.239s
+?   	github.com/parvpatel20/rate-limiter/internal/keybuild	[no test files]
+=== RUN   TestCircuitBreaker_Transitions
+--- PASS: TestCircuitBreaker_Transitions (0.09s)
+=== RUN   TestHybridLimiter_RedisUpAgreeingWithLocal
+--- PASS: TestHybridLimiter_RedisUpAgreeingWithLocal (0.04s)
+=== RUN   TestHybridLimiter_CrossInstanceSharedRedis
+--- PASS: TestHybridLimiter_CrossInstanceSharedRedis (0.11s)
+=== RUN   TestHybridLimiter_RedisDownFallsBackLocal
+redis: 2026/03/30 18:10:26 pool.go:617: redis: connection pool: failed to dial after 1 attempts: dial tcp 127.0.0.1:6399: connect: connection refused
+redis: 2026/03/30 18:10:26 pool.go:617: redis: connection pool: failed to dial after 1 attempts: dial tcp 127.0.0.1:6399: connect: connection refused
+2026/03/30 18:10:26 ERROR redis_error event=redis_error error="redis token bucket script failed for key \"tenant:acme|plan:free|user:1|method:GET|route:/v1/status\": dial tcp 127.0.0.1:6399: connect: connection refused" fallback=local_only
+redis: 2026/03/30 18:10:26 pool.go:617: redis: connection pool: failed to dial after 1 attempts: dial tcp 127.0.0.1:6399: connect: connection refused
+redis: 2026/03/30 18:10:26 pool.go:617: redis: connection pool: failed to dial after 1 attempts: dial tcp 127.0.0.1:6399: connect: connection refused
+2026/03/30 18:10:26 ERROR redis_error event=redis_error error="redis token bucket script failed for key \"tenant:acme|plan:free|user:1|method:GET|route:/v1/status\": dial tcp 127.0.0.1:6399: connect: connection refused" fallback=local_only
+--- PASS: TestHybridLimiter_RedisDownFallsBackLocal (0.24s)
+=== RUN   TestSlidingWindow_LimitAndRetryAfter
+--- PASS: TestSlidingWindow_LimitAndRetryAfter (0.00s)
+=== RUN   TestSlidingWindow_BoundaryBehavior
+--- PASS: TestSlidingWindow_BoundaryBehavior (0.06s)
+=== RUN   TestSlidingWindow_Concurrent
+--- PASS: TestSlidingWindow_Concurrent (0.01s)
+=== RUN   TestTokenBucket_LimitAndRetryAfter
+--- PASS: TestTokenBucket_LimitAndRetryAfter (0.00s)
+=== RUN   TestTokenBucket_Refill
+--- PASS: TestTokenBucket_Refill (0.03s)
+=== RUN   TestTokenBucket_Concurrent
+--- PASS: TestTokenBucket_Concurrent (0.00s)
+PASS
+ok  	github.com/parvpatel20/rate-limiter/internal/limiter	1.619s
+?   	github.com/parvpatel20/rate-limiter/internal/logging	[no test files]
+=== RUN   TestWrapLimiterCountsAllowedAndDenied
+--- PASS: TestWrapLimiterCountsAllowedAndDenied (0.00s)
+PASS
+ok  	github.com/parvpatel20/rate-limiter/internal/metrics	1.031s
+=== RUN   TestResolveWithMatcher_FallbackOrder
+=== RUN   TestResolveWithMatcher_FallbackOrder/full_match
+=== RUN   TestResolveWithMatcher_FallbackOrder/without_method_fallback
+=== RUN   TestResolveWithMatcher_FallbackOrder/without_user_fallback
+=== RUN   TestResolveWithMatcher_FallbackOrder/without_route_fallback
+=== RUN   TestResolveWithMatcher_FallbackOrder/plan_only_fallback
+=== RUN   TestResolveWithMatcher_FallbackOrder/tenant_only_fallback
+=== RUN   TestResolveWithMatcher_FallbackOrder/global_fallback
+--- PASS: TestResolveWithMatcher_FallbackOrder (0.00s)
+    --- PASS: TestResolveWithMatcher_FallbackOrder/full_match (0.00s)
+    --- PASS: TestResolveWithMatcher_FallbackOrder/without_method_fallback (0.00s)
+    --- PASS: TestResolveWithMatcher_FallbackOrder/without_user_fallback (0.00s)
+    --- PASS: TestResolveWithMatcher_FallbackOrder/without_route_fallback (0.00s)
+    --- PASS: TestResolveWithMatcher_FallbackOrder/plan_only_fallback (0.00s)
+    --- PASS: TestResolveWithMatcher_FallbackOrder/tenant_only_fallback (0.00s)
+    --- PASS: TestResolveWithMatcher_FallbackOrder/global_fallback (0.00s)
+=== RUN   TestResolveWithMatcher_NoPolicy
+--- PASS: TestResolveWithMatcher_NoPolicy (0.00s)
+PASS
+ok  	github.com/parvpatel20/rate-limiter/internal/policy	1.022s
+=== RUN   TestRedisStoreTokenBucket_Atomicity
+--- PASS: TestRedisStoreTokenBucket_Atomicity (0.16s)
+=== RUN   TestRedisStoreTokenBucket_SetsExpiry
+--- PASS: TestRedisStoreTokenBucket_SetsExpiry (0.00s)
+=== RUN   TestRedisStoreTokenBucket_CorruptedTypeReturnsError
+--- PASS: TestRedisStoreTokenBucket_CorruptedTypeReturnsError (0.00s)
+=== RUN   TestRedisStoreIncrBy_Basic
+--- PASS: TestRedisStoreIncrBy_Basic (0.01s)
+PASS
+ok  	github.com/parvpatel20/rate-limiter/internal/store	1.226s
