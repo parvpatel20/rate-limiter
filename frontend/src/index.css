@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 188 44% 98%;
+  --foreground: 215 40% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 215 40% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 215 40% 14%;
+  --primary: 186 76% 35%;
+  --primary-foreground: 190 92% 97%;
+  --secondary: 206 38% 93%;
+  --secondary-foreground: 215 34% 21%;
+  --muted: 204 31% 93%;
+  --muted-foreground: 214 20% 44%;
+  --accent: 29 94% 92%;
+  --accent-foreground: 22 66% 31%;
+  --destructive: 0 78% 53%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 204 25% 84%;
+  --input: 204 25% 84%;
+  --ring: 186 76% 35%;
+  --radius: 0.9rem;
+}
+
+.dark {
+  --background: 212 44% 10%;
+  --foreground: 203 50% 96%;
+  --card: 214 37% 14%;
+  --card-foreground: 203 50% 96%;
+  --popover: 214 37% 14%;
+  --popover-foreground: 203 50% 96%;
+  --primary: 182 69% 45%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 214 30% 21%;
+  --secondary-foreground: 203 50% 96%;
+  --muted: 214 30% 21%;
+  --muted-foreground: 206 20% 72%;
+  --accent: 22 62% 30%;
+  --accent-foreground: 25 88% 94%;
+  --destructive: 0 68% 40%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214 30% 28%;
+  --input: 214 30% 28%;
+  --ring: 182 69% 45%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+    background-image:
+      radial-gradient(60rem 28rem at 0% -10%, rgba(13, 148, 136, 0.22), transparent 58%),
+      radial-gradient(42rem 20rem at 100% 0%, rgba(249, 115, 22, 0.18), transparent 60%),
+      radial-gradient(58rem 24rem at 50% 120%, rgba(56, 189, 248, 0.15), transparent 64%);
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Manrope', 'Space Grotesk', sans-serif;
+    letter-spacing: -0.015em;
+  }
+}
+
+@layer utilities {
+  .glass-card {
+    @apply rounded-2xl border border-border/75 bg-card/80 shadow-[0_20px_70px_-40px_rgba(15,23,42,0.55)] backdrop-blur;
+  }
+
+  .chip {
+    @apply inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold tracking-wide;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-gradient {
+    background: linear-gradient(120deg, #0d9488 0%, #0284c7 52%, #ea580c 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .animate-rise {
+    animation: rise-in 420ms ease-out both;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

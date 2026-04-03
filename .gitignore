@@ -1,1 +1,8 @@
 .env
+
+# build artifacts
+ratelimitd
+
+# frontend artifacts
+frontend/node_modules/
+frontend/dist/

@@ -5,20 +5,90 @@ A production-style rate limiter service in Go with:
 - Redis-backed hybrid limiting for cross-instance correctness
 - policy-driven matching with hot reload
 - admin APIs for inspection/simulation/reload
-- Prometheus metrics and Grafana dashboard
-- lightweight built-in UI at `/ui`
+- Prometheus metrics
+- modern React + Vite control plane frontend
 
-## Run Locally
+## Quick Start
 
-1. Ensure `.env` is configured.
-2. Start service:
+### Prerequisites
+- Go 1.22+
+- Node.js 18+
+- Docker (for Redis)
+
+### 1) Start Redis
+
+```bash
+docker compose up -d redis
+```
+
+### 2) Start backend
 
 ```bash
 go run ./cmd/ratelimitd
 ```
 
-3. Useful endpoints:
-- `GET /ui` (built-in dashboard)
+Backend listens on:
+- `http://localhost:8080` (API + built-in `/ui`)
+- `http://localhost:9090/metrics` (dedicated metrics endpoint)
+
+### 3) Start frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Frontend listens on:
+- `http://localhost:5173`
+
+## Main Flows to Test
+
+### UI flows
+1. Open `http://localhost:5173`
+2. `Overview` tab: confirm KPI cards and charts load.
+3. `Rate Tester` tab: run a check with tenant `acme` and route `/v1/search`.
+4. `Policies` tab: load tenant policies for `acme`.
+5. `Simulation` tab: run a burst simulation and validate allow/deny forecast.
+
+### API flows (curl)
+
+```bash
+# Rate check
+curl -s -X POST http://localhost:8080/v1/check \
+  -H 'Content-Type: application/json' \
+  -d '{"tenant_id":"acme","route":"/v1/search","method":"GET"}'
+
+# Tenant policies
+curl -s http://localhost:8080/v1/policies/acme
+
+# Simulation
+curl -s -X POST http://localhost:8080/v1/simulate \
+  -H 'Content-Type: application/json' \
+  -d '{"tenant_id":"acme","route":"/v1/search","method":"GET","plan":"free","requests_per_second":25,"duration_seconds":10}'
+
+# Metrics
+curl -s http://localhost:8080/metrics | head
+```
+
+## Quality Checks
+
+From repo root:
+
+```bash
+GOCACHE=/tmp/go-build-cache go test ./...
+go build ./cmd/ratelimitd
+```
+
+From `frontend/`:
+
+```bash
+npm run lint
+npm run build
+```
+
+## Useful Endpoints
+- `GET /ui` (built-in backend UI)
 - `GET /` (rate-limited health endpoint; include `X-Tenant-ID`)
 - `POST /v1/check`
 - `GET /v1/policies/:tenantID`
