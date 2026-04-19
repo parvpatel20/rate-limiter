@@ -54,6 +54,10 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   html,
   body,
   #root {
@@ -61,6 +65,8 @@
   }
 
   body {
+    overflow-x: hidden;
+    overflow-y: auto;
     @apply bg-background text-foreground antialiased;
     font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
     background-image:
@@ -79,6 +85,7 @@
     font-family: 'Manrope', 'Space Grotesk', sans-serif;
     letter-spacing: -0.015em;
   }
+
 }
 
 @layer utilities {

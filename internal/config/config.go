@@ -15,6 +15,7 @@ type Config struct {
 	RedisURL     string
 	PoliciesFile string
 	Port         string
+	MetricsPort  string
 	FailureMode  string
 	AdminSecret  string
 	AppEnv       string
@@ -37,6 +38,7 @@ func LoadFromFile(envFile string) (Config, error) {
 		RedisURL:     os.Getenv("REDIS_URL"),
 		PoliciesFile: os.Getenv("POLICIES_FILE"),
 		Port:         os.Getenv("PORT"),
+		MetricsPort:  os.Getenv("METRICS_PORT"),
 		FailureMode:  strings.ToLower(os.Getenv("FAILURE_MODE")),
 		AdminSecret:  os.Getenv("ADMIN_SECRET"),
 		AppEnv:       strings.ToLower(os.Getenv("APP_ENV")),
@@ -50,6 +52,9 @@ func LoadFromFile(envFile string) (Config, error) {
 	}
 	if cfg.Port == "" {
 		return Config{}, fmt.Errorf("PORT is required")
+	}
+	if cfg.MetricsPort == "" {
+		cfg.MetricsPort = "9090"
 	}
 	if cfg.FailureMode == "" {
 		cfg.FailureMode = "open"

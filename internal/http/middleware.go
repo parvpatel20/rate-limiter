@@ -131,6 +131,9 @@ func (m *Middleware) Handler(next http.Handler) http.Handler {
 			return
 		}
 
+		if m.Metrics != nil {
+			m.Metrics.RequestsTotal.WithLabelValues(desc.TenantID, desc.Route, "allowed").Inc()
+		}
 		next.ServeHTTP(w, r)
 	})
 }

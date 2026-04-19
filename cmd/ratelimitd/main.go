@@ -2,17 +2,14 @@ package main
 
 import (
 	"context"
-	"errors"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 	"time"
 
-	"log/slog"
-
-	appconfig "github.com/parvpatel20/rate-limiter/internal/config"
+	"github.com/parvpatel20/rate-limiter/internal/config"
 	httplayer "github.com/parvpatel20/rate-limiter/internal/http"
 	"github.com/parvpatel20/rate-limiter/internal/keybuild"
 	"github.com/parvpatel20/rate-limiter/internal/limiter"
@@ -25,190 +22,144 @@ import (
 )
 
 func main() {
-	cfg, err := appconfig.Load()
+	cfg, err := config.Load()
 	if err != nil {
-		slog.Error("invalid config", "error", err)
+		slog.Error("load config", "error", err)
 		os.Exit(1)
 	}
 
 	logger := logging.NewLogger(cfg.AppEnv)
-	metricSet := metrics.New(prometheus.DefaultRegisterer)
-
-	policyStore, err := policy.NewYAMLStore(cfg.PoliciesFile)
-	if err != nil {
-		logger.Error("policy store init failed", "error", err)
-		os.Exit(1)
-	}
 
 	redisStore, err := store.NewRedisStore(cfg.RedisURL)
 	if err != nil {
-		logger.Error("redis store init failed", "error", err)
+		logger.Error("redis store", "error", err)
 		os.Exit(1)
 	}
-	defer redisStore.Close()
+	defer func() { _ = redisStore.Close() }()
 
-	localBucket := limiter.NewLocalTokenBucket()
-	hybrid := limiter.NewHybridLimiter(localBucket, redisStore, limiter.HybridConfig{
-		FailOpen: cfg.FailureMode == "open",
+	reg := prometheus.NewRegistry()
+	m := metrics.New(reg)
+
+	localTB := limiter.NewLocalTokenBucket()
+	failOpen := cfg.FailureMode == "open"
+
+	hyb := limiter.NewHybridLimiter(localTB, redisStore, limiter.HybridConfig{
+		FailOpen: failOpen,
 		Logger:   logger,
 		OnLocalDecision: func(decision string) {
-			metricSet.LocalDecisionsTotal.WithLabelValues(decision).Inc()
+			m.LocalDecisionsTotal.WithLabelValues(decision).Inc()
 		},
 		OnRedisDuration: func(operation string, d time.Duration) {
-			metricSet.RedisDurationSeconds.WithLabelValues(operation).Observe(d.Seconds())
+			m.RedisDurationSeconds.WithLabelValues(operation).Observe(d.Seconds())
 		},
 		CircuitBreaker: limiter.CircuitBreakerConfig{
-			OpenAfterFailures: 5,
-			OpenTimeout:       30 * time.Second,
-			OnStateChange: func(state limiter.CircuitState, failures int) {
-				metricSet.ObserveCircuitState(state)
-				event := "circuit_breaker_closed"
-				levelAttrs := []any{"event", event, "consecutive_failures", failures}
-				switch state {
-				case limiter.CircuitOpen:
-					event = "circuit_breaker_open"
-					levelAttrs[1] = event
-					logger.Warn("circuit breaker open", levelAttrs...)
-				case limiter.CircuitHalfOpen:
-					event = "circuit_breaker_half_open"
-					levelAttrs[1] = event
-					logger.Warn("circuit breaker half-open", levelAttrs...)
-				default:
-					logger.Info("circuit breaker closed", levelAttrs...)
-				}
+			OnStateChange: func(state limiter.CircuitState, _ int) {
+				m.ObserveCircuitState(state)
 			},
 		},
 	})
-	metricSet.ObserveCircuitState(hybrid.CircuitState())
-	sliding := limiter.NewLocalSlidingWindow()
+	m.ObserveCircuitState(hyb.CircuitState())
+
+	go func() {
+		tick := time.NewTicker(5 * time.Second)
+		defer tick.Stop()
+		for range tick.C {
+			m.ActiveKeys.Set(float64(localTB.ActiveKeys()))
+			m.ObserveCircuitState(hyb.CircuitState())
+		}
+	}()
+
+	policyStore, err := policy.NewYAMLStore(cfg.PoliciesFile)
+	if err != nil {
+		logger.Error("policy store", "error", err)
+		os.Exit(1)
+	}
 
 	builder := keybuild.NewHTTPBuilder(map[string]string{
-		"acme":   "enterprise",
-		"globex": "free",
+		"acme":     "enterprise",
+		"globex":   "free",
+		"initech":  "free",
+		"umbrella": "enterprise",
 	})
 
-	mw := httplayer.NewMiddleware(builder, policyStore, hybrid, sliding, logger)
+	sliding := limiter.NewLocalSlidingWindow()
+	mw := httplayer.NewMiddleware(builder, policyStore, hyb, sliding, logger)
+	mw.Metrics = m
 	mw.FailureMode = cfg.FailureMode
-	mw.Timeout = 100 * time.Millisecond
-	mw.Metrics = metricSet
 
 	admin := &httplayer.AdminAPI{
 		Builder:        builder,
 		Policies:       policyStore,
-		TokenLimiter:   hybrid,
+		TokenLimiter:   hyb,
 		SlidingLimiter: sliding,
 		AdminSecret:    cfg.AdminSecret,
 	}
 
-	mux := http.NewServeMux()
-	mux.Handle("/metrics", promhttp.Handler())
-	mux.HandleFunc("/ui", httplayer.UIHandler())
-	admin.Register(mux)
-	root := mw.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"status":"ok"}`))
-	}))
-	mux.Handle("/", root)
+	mainMux := http.NewServeMux()
+	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg})
+	mainMux.Handle("GET /metrics", promHandler)
+	mainMux.Handle("GET /ui", httplayer.UIHandler())
 
-	srv := &http.Server{
+	admin.Register(mainMux)
+
+	healthHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"status":"ok","service":"ratelimitd"}`))
+	})
+	mainMux.Handle("/", mw.Handler(healthHandler))
+
+	metricsMux := http.NewServeMux()
+	metricsMux.Handle("GET /metrics", promHandler)
+
+	mainSrv := &http.Server{
 		Addr:              ":" + cfg.Port,
-		Handler:           mux,
-		ReadHeaderTimeout: 5 * time.Second,
+		Handler:           mainMux,
+		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      60 * time.Second,
+		IdleTimeout:       120 * time.Second,
 	}
+
+	metricsSrv := &http.Server{
+		Addr:              ":" + cfg.MetricsPort,
+		Handler:           metricsMux,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       15 * time.Second,
+		WriteTimeout:      15 * time.Second,
+	}
+
+	separateMetrics := cfg.MetricsPort != cfg.Port
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	var wg sync.WaitGroup
-	done := make(chan struct{})
-
-	wg.Add(1)
 	go func() {
-		defer wg.Done()
-		ticker := time.NewTicker(30 * time.Second)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-done:
-				return
-			case <-ticker.C:
-				start := time.Now()
-				err := policyStore.Reload()
-				if err != nil {
-					logger.Warn("policy reload failed", "event", "policy_reload", "error", err, "duration_ms", time.Since(start).Milliseconds())
-					continue
-				}
-				loaded := len(policyStore.List())
-				logger.Info("policy reload succeeded", "event", "policy_reload", "policies_loaded", loaded, "duration_ms", time.Since(start).Milliseconds())
+		if separateMetrics {
+			logger.Info("ratelimitd listening", "http", mainSrv.Addr, "metrics", metricsSrv.Addr)
+		} else {
+			logger.Info("ratelimitd listening", "http", mainSrv.Addr, "metrics", "same port as http (GET /metrics)")
+		}
+		if err := mainSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Error("http server", "error", err)
+			os.Exit(1)
+		}
+	}()
+
+	if separateMetrics {
+		go func() {
+			if err := metricsSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				logger.Error("metrics server", "error", err)
+				os.Exit(1)
 			}
-		}
-	}()
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		ticker := time.NewTicker(5 * time.Minute)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-done:
-				return
-			case <-ticker.C:
-				evicted, remaining := localBucket.CleanupStats(10 * time.Minute)
-				metricSet.ActiveKeys.Set(float64(remaining))
-				logger.Debug("bucket cleanup run", "event", "bucket_cleanup", "keys_evicted", evicted, "keys_remaining", remaining)
-			}
-		}
-	}()
-
-	errCh := make(chan error, 1)
-	metricsErrCh := make(chan error, 1)
-	go func() {
-		logger.Info("ratelimitd listening", "addr", srv.Addr)
-		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			errCh <- err
-		}
-	}()
-
-	metricsSrv := &http.Server{
-		Addr: ":9090",
-		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path == "/metrics" {
-				promhttp.Handler().ServeHTTP(w, r)
-				return
-			}
-			http.NotFound(w, r)
-		}),
-		ReadHeaderTimeout: 5 * time.Second,
-	}
-	go func() {
-		logger.Info("metrics listening", "addr", metricsSrv.Addr)
-		if err := metricsSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			metricsErrCh <- err
-		}
-	}()
-
-	select {
-	case <-ctx.Done():
-		logger.Info("shutdown signal received")
-	case err := <-errCh:
-		logger.Error("server failed", "error", err)
-	case err := <-metricsErrCh:
-		logger.Error("metrics server failed", "error", err)
+		}()
 	}
 
-	close(done)
+	<-ctx.Done()
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
-	if err := srv.Shutdown(shutdownCtx); err != nil {
-		logger.Error("graceful shutdown failed", "error", err)
+	_ = mainSrv.Shutdown(shutdownCtx)
+	if separateMetrics {
+		_ = metricsSrv.Shutdown(shutdownCtx)
 	}
-	if err := metricsSrv.Shutdown(shutdownCtx); err != nil {
-		logger.Error("metrics graceful shutdown failed", "error", err)
-	}
-	if err := redisStore.Close(); err != nil {
-		logger.Warn("redis close failed", "error", err)
-	}
-	wg.Wait()
+	logger.Info("shutdown complete")
 }

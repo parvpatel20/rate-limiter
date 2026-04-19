@@ -7,6 +7,10 @@ import {
   RefreshCcw,
   Sun,
   Waves,
+  Heart,
+  Zap,
+  Settings,
+  Cpu,
 } from 'lucide-react'
 import { useTheme } from './hooks/useTheme'
 import { Button } from './components/ui/Button'
@@ -17,9 +21,12 @@ import MetricsDashboard from './components/MetricsDashboard'
 import RateTester from './components/RateTester'
 import PolicyViewer from './components/PolicyViewer'
 import BurstSimulator from './components/BurstSimulator'
+import HealthCheck from './components/HealthCheck'
+import BurstTest from './components/BurstTest'
+import AdminPanel from './components/AdminPanel'
 import { pickMetricByLabels } from './lib/utils'
 
-type TabId = 'dashboard' | 'tester' | 'policies' | 'simulate'
+type TabId = 'dashboard' | 'tester' | 'policies' | 'simulate' | 'health' | 'burst' | 'admin'
 
 function formatMetric(value: number) {
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value)
@@ -35,9 +42,17 @@ export default function App() {
     () => pickMetricByLabels(metrics, 'ratelimit_requests_total', ['result="denied"']),
     [metrics],
   )
+  const allowedRequests = useMemo(
+    () => pickMetricByLabels(metrics, 'ratelimit_requests_total', ['result="allowed"']),
+    [metrics],
+  )
   const activeKeys = useMemo(() => metrics['ratelimit_active_keys'] ?? 0, [metrics])
   const redisLatencySamples = useMemo(() => metrics['ratelimit_redis_duration_seconds_count'] ?? 0, [metrics])
   const circuitStateValue = useMemo(() => metrics['ratelimit_circuit_breaker_state'] ?? 0, [metrics])
+  const fastAllows = useMemo(
+    () => pickMetricByLabels(metrics, 'ratelimit_local_decisions_total', ['decision="fast_allow"']),
+    [metrics],
+  )
 
   const circuitStateLabel =
     circuitStateValue >= 1.5 ? 'Half Open' : circuitStateValue >= 0.5 ? 'Open' : 'Closed'
@@ -49,31 +64,45 @@ export default function App() {
         ? 'border-warn/40 bg-warn/10 text-warn'
         : 'border-deny/40 bg-deny/10 text-deny'
 
+  // Calculate success rate
+  const successRate = useMemo(() => {
+    if (totalRequests === 0) return 100
+    return (allowedRequests / totalRequests) * 100
+  }, [totalRequests, allowedRequests])
+
   const tabs: Array<{ id: TabId; title: string; icon: typeof LayoutDashboard }> = [
     { id: 'dashboard', title: 'Overview', icon: LayoutDashboard },
     { id: 'tester', title: 'Rate Tester', icon: Activity },
     { id: 'policies', title: 'Policies', icon: ListFilter },
     { id: 'simulate', title: 'Simulation', icon: Waves },
+    { id: 'health', title: 'Health', icon: Heart },
+    { id: 'burst', title: 'Burst Test', icon: Zap },
+    { id: 'admin', title: 'Admin', icon: Settings },
   ]
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
-      <div className="pointer-events-none absolute inset-0 -z-10">
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background text-foreground">
+      {/* Background Gradient Orbs */}
+      <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute left-[-12%] top-[-8%] h-72 w-72 rounded-full bg-[radial-gradient(circle_at_center,rgba(13,148,136,0.28),transparent_70%)]" />
         <div className="absolute right-[-8%] top-[5%] h-80 w-80 rounded-full bg-[radial-gradient(circle_at_center,rgba(251,146,60,0.24),transparent_70%)]" />
         <div className="absolute bottom-[-18%] left-[20%] h-96 w-96 rounded-full bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.2),transparent_70%)]" />
       </div>
 
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
-        <header className="glass-card animate-rise p-6 sm:p-8">
+      <main className="relative z-0 mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-8 sm:py-10">
+        {/* Header */}
+        <header className="glass-card animate-rise min-w-0 p-6 sm:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-3">
-              <p className="chip border-border/80 bg-background/70 text-muted-foreground">Production Control Plane</p>
+              <p className="chip w-fit border-border/80 bg-background/70 text-muted-foreground">
+                Production Control Plane
+              </p>
               <h1 className="text-balance text-3xl font-display font-extrabold leading-tight sm:text-4xl">
                 <span className="text-gradient">Rate Limiter</span> Command Center
               </h1>
               <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-                Monitor live enforcement, validate tenant policy behavior, and pressure-test limits before rollout.
+                Monitor live enforcement, validate tenant policy behavior, and pressure-test limits
+                before rollout.
               </p>
             </div>
 
@@ -87,7 +116,7 @@ export default function App() {
                 disabled={loading}
                 className="gap-2"
               >
-                <RefreshCcw className="h-4 w-4" />
+                <RefreshCcw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                 {loading ? 'Refreshing...' : 'Refresh Metrics'}
               </Button>
 
@@ -105,7 +134,8 @@ export default function App() {
             </div>
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-2">
+          {/* Tab Navigation */}
+          <div className="mt-6 flex min-w-0 flex-wrap gap-2 overflow-x-auto pb-0.5 [-webkit-overflow-scrolling:touch]">
             {tabs.map((tab) => {
               const Icon = tab.icon
               return (
@@ -116,16 +146,19 @@ export default function App() {
                   onClick={() => setActiveTab(tab.id)}
                 >
                   <Icon className="h-4 w-4" />
-                  {tab.title}
+                  <span className="hidden sm:inline">{tab.title}</span>
                 </Button>
               )
             })}
           </div>
         </header>
 
-        <section className="mt-6 space-y-6">
+        {/* Main Content */}
+        <section className="mt-6 min-w-0 space-y-6 pb-4">
+          {/* Dashboard Tab */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6 animate-rise">
+              {/* KPI Cards */}
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <Card className="glass-card">
                   <CardHeader>
@@ -133,6 +166,9 @@ export default function App() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-2xl font-display font-bold">{formatMetric(totalRequests)}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {successRate.toFixed(1)}% success rate
+                    </p>
                   </CardContent>
                 </Card>
 
@@ -142,6 +178,9 @@ export default function App() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-2xl font-display font-bold text-deny">{formatMetric(deniedRequests)}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {totalRequests > 0 ? ((deniedRequests / totalRequests) * 100).toFixed(1) : 0}% denial rate
+                    </p>
                   </CardContent>
                 </Card>
 
@@ -151,6 +190,7 @@ export default function App() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-2xl font-display font-bold">{formatMetric(activeKeys)}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Tracked rate limit keys</p>
                   </CardContent>
                 </Card>
 
@@ -161,20 +201,59 @@ export default function App() {
                   <CardContent className="space-y-2">
                     <span className={`chip ${circuitStateTone}`}>{circuitStateLabel}</span>
                     <p className="text-xs text-muted-foreground">
-                      Redis latency samples captured: {formatMetric(redisLatencySamples)}
+                      Redis samples: {formatMetric(redisLatencySamples)}
                     </p>
                   </CardContent>
                 </Card>
               </div>
 
+              {/* Performance Metrics */}
               <Card className="glass-card">
                 <CardHeader>
-                  <CardTitle>Telemetry Status</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Cpu className="h-5 w-5 text-primary" />
+                    Performance Overview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="rounded-xl border border-border/70 bg-card/60 p-3">
+                      <p className="text-xs text-muted-foreground">Fast Allows</p>
+                      <p className="text-xl font-bold text-success">{formatMetric(fastAllows)}</p>
+                      <p className="text-xs text-muted-foreground">Local decisions</p>
+                    </div>
+                    <div className="rounded-xl border border-border/70 bg-card/60 p-3">
+                      <p className="text-xs text-muted-foreground">Allowed</p>
+                      <p className="text-xl font-bold text-success">{formatMetric(allowedRequests)}</p>
+                      <p className="text-xs text-muted-foreground">Within limits</p>
+                    </div>
+                    <div className="rounded-xl border border-border/70 bg-card/60 p-3">
+                      <p className="text-xs text-muted-foreground">Errors</p>
+                      <p className="text-xl font-bold text-warn">
+                        {formatMetric(pickMetricByLabels(metrics, 'ratelimit_requests_total', ['result="error"']))}
+                      </p>
+                      <p className="text-xs text-muted-foreground">System errors</p>
+                    </div>
+                    <div className="rounded-xl border border-border/70 bg-card/60 p-3">
+                      <p className="text-xs text-muted-foreground">Success Rate</p>
+                      <p className="text-xl font-bold text-primary">{successRate.toFixed(1)}%</p>
+                      <p className="text-xs text-muted-foreground">Overall health</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Telemetry Status */}
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle>System Status</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-wrap items-center gap-3 text-sm">
                   <span
                     className={`chip ${
-                      error ? 'border-deny/40 bg-deny/10 text-deny' : 'border-success/40 bg-success/10 text-success'
+                      error
+                        ? 'border-deny/40 bg-deny/10 text-deny'
+                        : 'border-success/40 bg-success/10 text-success'
                     }`}
                   >
                     {error ? 'Metrics Degraded' : 'Metrics Healthy'}
@@ -193,13 +272,36 @@ export default function App() {
             </div>
           )}
 
+          {/* Rate Tester Tab */}
           {activeTab === 'tester' && <RateTester />}
 
+          {/* Policies Tab */}
           {activeTab === 'policies' && <PolicyViewer />}
 
+          {/* Simulation Tab */}
           {activeTab === 'simulate' && <BurstSimulator />}
+
+          {/* Health Check Tab */}
+          {activeTab === 'health' && <HealthCheck />}
+
+          {/* Burst Test Tab */}
+          {activeTab === 'burst' && <BurstTest />}
+
+          {/* Admin Tab */}
+          {activeTab === 'admin' && <AdminPanel />}
         </section>
       </main>
+
+      {/* Footer */}
+      <footer className="mx-auto mt-auto w-full max-w-7xl shrink-0 px-4 py-6 sm:px-8">
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-border/50 py-4 text-center text-xs text-muted-foreground sm:flex-row">
+          <p>
+            Rate Limiter Command Center v1.0 | Backend:{' '}
+            <span className="font-mono">http://localhost:8080</span>
+          </p>
+          <p>Built with Go, React, and Tailwind CSS</p>
+        </div>
+      </footer>
     </div>
   )
 }
